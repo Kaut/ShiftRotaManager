@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Rota Calendar";
+}
+
+<h1 class="text-center mb-4">Rota Calendar</h1>
+
+<div id='calendar' class="shadow-sm rounded-3 p-3 bg-white"></div>
+
+@section Scripts {
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js'></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth', // Default view
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay' // Views available
+                },
+                locale: 'en-gb', // Or your preferred locale
+                editable: false, // Set to true if you want drag-and-drop editing
+                selectable: true,
+                eventClick: function(info) {
+                    // Redirect to the event's URL (Rota Edit page)
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                        info.jsEvent.preventDefault(); // Prevent default browser action
+                    }
+                },
+                // Fetch events from your API endpoint
+                events: {
+                    url: '@Url.Action("GetCalendarRotas", "Rotas")',
+                    method: 'GET',
+                    extraParams: function() {
+                        // You can add extra parameters here if needed, e.g., filters
+                        return {};
+                    },
+                    failure: function(failureInfo) {
+                        console.error('There was an error while fetching rotas:', failureInfo.error);
+                        alert('There was an error fetching the rota data. Please check the console for details.');
+                    }
+                },
+                // Customize event rendering for better display
+                eventContent: function(arg) {
+                    let title = arg.event.title;
+                    let timeText = arg.timeText ? `<div class="fc-event-time">${arg.timeText}</div>` : '';
+
+                    let eventEl = document.createElement('div');
+                    eventEl.innerHTML = `${timeText}<div class="fc-event-title">${title}</div>`;
+
+                    // You can add more complex styling or icons here based on arg.event.extendedProps
+                    // For example, if you passed 'status' in extendedProps:
+                    if (arg.event.extendedProps.status === 'Open') {
+                        eventEl.style.borderLeft = '5px solid orange';
+                    }
+
+                    return { domNodes: [eventEl] };
+                },
+                // Optional: Customize event colors based on status (already handled in C# for simplicity)
+                // eventDidMount: function(info) {
+                //     if (info.event.extendedProps.status === 'Open') {
+                //         info.el.style.backgroundColor = 'orange';
+                //         info.el.style.borderColor = 'darkorange';
+                //     }
+                // }
+            });
+
+            calendar.render();
+        });
+    </script>
+}

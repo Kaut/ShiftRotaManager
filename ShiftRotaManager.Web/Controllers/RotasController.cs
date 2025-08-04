@@ -194,5 +194,79 @@ namespace ShiftRotaManager.Web.Controllers
             ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", teamMemberId);
             return View(rota);
         }
+
+        // GET: Rotas/Calendar - New action for the calendar view
+        public IActionResult Calendar()
+        {
+            ViewData["Title"] = "Rota Calendar";
+            return View();
+        }
+
+        // GET: Rotas/GetCalendarRotas - API endpoint for FullCalendar
+        [HttpGet]
+        public async Task<IActionResult> GetCalendarRotas(DateTime start, DateTime end)
+        {
+            var rotas = await _rotaService.GetRotasForCalendarAsync(start, end);
+
+            var events = rotas.Select(r =>
+            {
+                var title = $"{r.Shift.Name}";
+                if (r.TeamMember != null)
+                {
+                    title += $" - {r.TeamMember.FirstName}";
+                }
+                else
+                {
+                    title += " (Open)";
+                }
+
+                if (r.PairedTeamMember != null)
+                {
+                    title += $" w/ {r.PairedTeamMember.FirstName}";
+                }
+
+                // FullCalendar expects 'start' and 'end' in ISO 8601 format
+                // Combine Date with Shift's StartTime and EndTime
+                var eventStart = r.Date.Date.Add(r.Shift.StartTime);
+                var eventEnd = r.Date.Date.Add(r.Shift.EndTime);
+
+                // Handle night shifts that cross midnight
+                if (r.Shift.IsNightShift && r.Shift.EndTime <= r.Shift.StartTime)
+                {
+                    eventEnd = eventEnd.AddDays(1);
+                }
+
+                string backgroundColor = "#007bff"; // Default blue for assigned
+                string textColor = "#ffffff"; // Default white text
+                if (r.Status == RotaStatus.Open)
+                {
+                    backgroundColor = "#ffc107"; // Yellow for open
+                    textColor = "#343a40"; // Dark text for yellow background
+                }
+                else if (r.Status == RotaStatus.Leave || r.Status == RotaStatus.Illness)
+                {
+                    backgroundColor = "#dc3545"; // Red for leave/illness
+                }
+                else if (r.PairedTeamMemberId.HasValue)
+                {
+                    backgroundColor = "#28a745"; // Green for paired/training
+                }
+
+
+                return new
+                {
+                    id = r.Id,
+                    title = title,
+                    start = eventStart.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    end = eventEnd.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    allDay = false, // Shifts usually have specific times
+                    backgroundColor = backgroundColor,
+                    textColor = textColor,
+                    url = $"/Rotas/Edit/{r.Id}" // Link to edit rota
+                };
+            }).ToList();
+
+            return Json(events);
+        }
     }
 }
