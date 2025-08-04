@@ -1,0 +1,15 @@
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\bin\Debug\net9.0\ShiftRotaManager.Core.deps.json
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\bin\Debug\net9.0\ShiftRotaManager.Core.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\bin\Debug\net9.0\ShiftRotaManager.Core.pdb
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\bin\Debug\net9.0\ShiftRotaManager.Data.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\bin\Debug\net9.0\ShiftRotaManager.Data.pdb
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.csproj.AssemblyReference.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.AssemblyInfoInputs.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.AssemblyInfo.cs
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.csproj.CoreCompileInputs.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRot.0F6D06FB.Up2Date
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\refint\ShiftRotaManager.Core.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.pdb
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ref\ShiftRotaManager.Core.dll
