@@ -1,0 +1,39 @@
+@model ShiftRotaManager.Data.Models.TeamMember
+
+@{
+    ViewData["Title"] = "Edit Team Member";
+}
+
+<h1 class="text-center mb-4">Edit Team Member</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="mb-3">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control rounded" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control rounded" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control rounded" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

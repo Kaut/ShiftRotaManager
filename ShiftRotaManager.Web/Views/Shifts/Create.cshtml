@@ -1,0 +1,52 @@
+@model ShiftRotaManager.Data.Models.Shift
+
+@{
+    ViewData["Title"] = "Create Shift";
+}
+
+<h1 class="text-center mb-4">Create New Shift</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control rounded" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="StartTime" class="form-label"></label>
+                <input asp-for="StartTime" type="time" class="form-control rounded" />
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="EndTime" class="form-label"></label>
+                <input asp-for="EndTime" type="time" class="form-control rounded" />
+                <span asp-validation-for="EndTime" class="text-danger"></span>
+            </div>
+            <div class="mb-3 form-check">
+                <input class="form-check-input rounded" asp-for="IsNightShift" />
+                <label class="form-check-label" asp-for="IsNightShift"></label>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MinStaffRequired" class="form-label"></label>
+                <input asp-for="MinStaffRequired" type="number" class="form-control rounded" />
+                <span asp-validation-for="MinStaffRequired" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MaxStaffAllowed" class="form-label"></label>
+                <input asp-for="MaxStaffAllowed" type="number" class="form-control rounded" />
+                <span asp-validation-for="MaxStaffAllowed" class="text-danger"></span>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill">Create</button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

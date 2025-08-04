@@ -1,0 +1,47 @@
+@model ShiftRotaManager.Data.Models.Rota
+
+@{
+    ViewData["Title"] = "Create Rota Assignment";
+}
+
+<h1 class="text-center mb-4">Create Rota Assignment</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="mb-3">
+                <label asp-for="Date" class="form-label"></label>
+                <input asp-for="Date" type="date" class="form-control rounded" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ShiftId" class="form-label">Shift</label>
+                <select asp-for="ShiftId" class="form-control rounded" asp-items="ViewBag.Shifts"></select>
+                <span asp-validation-for="ShiftId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="TeamMemberId" class="form-label">Assigned Team Member (Optional, leave blank for Open Shift)</label>
+                <select asp-for="TeamMemberId" class="form-control rounded" asp-items="ViewBag.TeamMembers">
+                    <option value="">-- Select Team Member --</option>
+                </select>
+                <span asp-validation-for="TeamMemberId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PairedTeamMemberId" class="form-label">Paired Team Member (Optional, for training)</label>
+                <select asp-for="PairedTeamMemberId" class="form-control rounded" asp-items="ViewBag.PairedTeamMembers">
+                    <option value="">-- Select Paired Team Member --</option>
+                </select>
+                <span asp-validation-for="PairedTeamMemberId" class="text-danger"></span>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill">Create Rota</button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

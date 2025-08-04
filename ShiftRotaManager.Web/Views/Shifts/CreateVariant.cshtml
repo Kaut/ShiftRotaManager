@@ -1,0 +1,39 @@
+@model ShiftRotaManager.Data.Models.ShiftVariant
+
+@{
+    ViewData["Title"] = "Create Shift Variant";
+}
+
+<h1 class="text-center mb-4">Create Shift Variant for "@ViewBag.BaseShiftName"</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="CreateVariant">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="BaseShiftId" />
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control rounded" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="StartTimeOffset" class="form-label">Start Time Offset (HH:MM:SS)</label>
+                <input asp-for="StartTimeOffset" type="time" step="1" class="form-control rounded" />
+                <span asp-validation-for="StartTimeOffset" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="EndTimeOffset" class="form-label">End Time Offset (HH:MM:SS)</label>
+                <input asp-for="EndTimeOffset" type="time" step="1" class="form-control rounded" />
+                <span asp-validation-for="EndTimeOffset" class="text-danger"></span>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary rounded-pill">Create Variant</button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to Shifts</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
