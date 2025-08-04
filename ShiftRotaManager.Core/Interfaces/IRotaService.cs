@@ -12,5 +12,6 @@ namespace ShiftRotaManager.Core.Interfaces
         Task AssignOpenShiftAsync(Guid rotaId, Guid teamMemberId);
         Task<IEnumerable<Rota>> GetOpenRotasAsync();
         Task<IEnumerable<Rota>> GetRotasForTeamMemberAsync(Guid teamMemberId);
+        Task<IEnumerable<Rota>> GetRotasForCalendarAsync(DateTime startDate, DateTime endDate);
     }
 }

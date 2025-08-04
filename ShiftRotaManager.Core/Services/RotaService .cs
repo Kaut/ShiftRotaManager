@@ -156,5 +156,11 @@ namespace ShiftRotaManager.Core.Services
         {
             return await _rotaRepository.GetRotasByTeamMemberIdAsync(teamMemberId);
         }
+
+        // get rotas for a calendar view within a date range
+        public async Task<IEnumerable<Rota>> GetRotasForCalendarAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _rotaRepository.GetRotasByDateRangeAsync(startDate, endDate);
+        }
     }
 }

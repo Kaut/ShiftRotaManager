@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShiftRotaManager.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+20a22b57d0de4b057fae1cec7e433192b2f550bd")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShiftRotaManager.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShiftRotaManager.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

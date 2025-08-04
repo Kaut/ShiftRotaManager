@@ -13,3 +13,4 @@ C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Deb
 C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\refint\ShiftRotaManager.Core.dll
 C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.pdb
 C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ref\ShiftRotaManager.Core.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Core\obj\Debug\net9.0\ShiftRotaManager.Core.sourcelink.json
