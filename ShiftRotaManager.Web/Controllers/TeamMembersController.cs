@@ -1,3 +1,4 @@
+// --- ShiftRotaManager.Web/Controllers/TeamMembersController.cs ---
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShiftRotaManager.Core.Interfaces;
@@ -5,6 +6,7 @@ using ShiftRotaManager.Data.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace ShiftRotaManager.Web.Controllers
 {
@@ -122,6 +124,14 @@ namespace ShiftRotaManager.Web.Controllers
         {
             await _teamMemberService.DeleteTeamMemberAsync(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        // API ENDPOINT: For FullCalendar resources
+        [HttpGet("api/TeamMembers")] // API endpoint for fetching all team members as JSON
+        public async Task<ActionResult<IEnumerable<TeamMember>>> GetTeamMembersApi()
+        {
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+            return Ok(teamMembers);
         }
     }
 }

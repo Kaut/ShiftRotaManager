@@ -1,3 +1,6 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShiftRotaManager.Core.Interfaces;
@@ -196,17 +199,21 @@ namespace ShiftRotaManager.Web.Controllers
         }
 
         // GET: Rotas/Calendar - New action for the calendar view
-        public IActionResult Calendar()
+        public async Task<IActionResult> Calendar()
         {
             ViewData["Title"] = "Rota Calendar";
+            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName");
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name");
+            ViewBag.RotaStatuses = new SelectList(Enum.GetValues(typeof(RotaStatus)).Cast<RotaStatus>().Select(s => new { Id = (int)s, Name = s.ToString() }), "Id", "Name");
             return View();
         }
 
-        // GET: Rotas/GetCalendarRotas - API endpoint for FullCalendar
+        // GET: Rotas/GetCalendarRotas - API endpoint for FullCalendar with filters
         [HttpGet]
-        public async Task<IActionResult> GetCalendarRotas(DateTime start, DateTime end)
+        public async Task<IActionResult> GetCalendarRotas(DateTime start, DateTime end, Guid? teamMemberId, Guid? shiftId, RotaStatus? status)
         {
-            var rotas = await _rotaService.GetRotasForCalendarAsync(start, end);
+            var rotas = await _rotaService.GetRotasForCalendarAsync(start, end, teamMemberId, shiftId, status);
+            var allTeamMembers = (await _teamMemberService.GetAllTeamMembersAsync()).ToDictionary(tm => tm.Id);
 
             var events = rotas.Select(r =>
             {
@@ -252,21 +259,83 @@ namespace ShiftRotaManager.Web.Controllers
                     backgroundColor = "#28a745"; // Green for paired/training
                 }
 
+                // Determine resourceId for resource views
+                string? resourceId = r.TeamMemberId.HasValue ? r.TeamMemberId.Value.ToString() : null;
 
                 return new
                 {
                     id = r.Id,
-                    title = title,
+                    title,
                     start = eventStart.ToString("yyyy-MM-ddTHH:mm:ss"),
                     end = eventEnd.ToString("yyyy-MM-ddTHH:mm:ss"),
                     allDay = false, // Shifts usually have specific times
                     backgroundColor = backgroundColor,
                     textColor = textColor,
-                    url = $"/Rotas/Edit/{r.Id}" // Link to edit rota
+                    url = $"/Rotas/Edit/{r.Id}", // Link to edit rota
+                    status = r.Status.ToString(), // Pass status for potential frontend styling
+                    teamMemberId = r.TeamMemberId, // Pass for filtering/resource grouping
+                    shiftId = r.ShiftId, // Pass for filtering
+                    resourceId = resourceId // For resource views
                 };
             }).ToList();
 
             return Json(events);
         }
+
+        // NEW API ENDPOINT: For drag-and-drop updates
+        [HttpPut("api/rotas/{id}/update-datetime")]
+        public async Task<IActionResult> UpdateRotaDateTime(Guid id, [FromBody] RotaUpdateDto updateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _rotaService.UpdateRotaDateTimeAsync(
+                    id,
+                    updateDto.NewDate,
+                    updateDto.NewStartTime,
+                    updateDto.NewEndTime,
+                    updateDto.NewTeamMemberId,
+                    updateDto.NewPairedTeamMemberId
+                );
+                return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the rota date/time.", error = ex.Message });
+            }
+        }
+
+        // NEW API ENDPOINT: For deleting rota from calendar
+        [HttpDelete("api/rotas/{id}")]
+        public async Task<IActionResult> DeleteRotaApi(Guid id)
+        {
+            try
+            {
+                await _rotaService.DeleteRotaAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while deleting the rota.", error = ex.Message });
+            }
+        }
+    }
+
+    // DTO for receiving update data from FullCalendar eventDrop
+    public class RotaUpdateDto
+    {
+        public DateTime NewDate { get; set; }
+        public TimeSpan NewStartTime { get; set; }
+        public TimeSpan NewEndTime { get; set; }
+        public Guid? NewTeamMemberId { get; set; } // For resource view drag-and-drop
+        public Guid? NewPairedTeamMemberId { get; set; } // If we want to support changing paired member via drag/drop
     }
 }
