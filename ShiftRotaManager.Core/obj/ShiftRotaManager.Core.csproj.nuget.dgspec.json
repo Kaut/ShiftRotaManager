@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj": {}
+    "c:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj": {}
   },
   "projects": {
-    "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj": {
+    "c:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj",
+        "projectUniqueName": "c:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj",
         "projectName": "ShiftRotaManager.Core",
-        "projectPath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj",
+        "projectPath": "c:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj",
         "packagesPath": "C:\\Users\\v-kaushukla\\.nuget\\packages\\",
-        "outputPath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\obj\\",
+        "outputPath": "c:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

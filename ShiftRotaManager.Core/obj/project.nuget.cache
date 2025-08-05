@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "U2tI3BmUs+w=",
+  "dgSpecHash": "s+bmfpVbikA=",
   "success": true,
-  "projectFilePath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj",
+  "projectFilePath": "c:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Core\\ShiftRotaManager.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\v-kaushukla\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\v-kaushukla\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

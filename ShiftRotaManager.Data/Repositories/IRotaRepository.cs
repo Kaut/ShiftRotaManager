@@ -6,7 +6,8 @@ namespace ShiftRotaManager.Data.Repositories
     {
         Task<IEnumerable<Rota>> GetAllRotasWithDetailsAsync();
         Task<Rota?> GetRotaByIdWithDetailsAsync(Guid id);
-        Task<IEnumerable<Rota>> GetRotasByDateRangeAsync(DateTime startDate, DateTime endDate);
+        // Updated: Added optional filter parameters
+        Task<IEnumerable<Rota>> GetRotasByDateRangeAsync(DateTime startDate, DateTime endDate, Guid? teamMemberId = null, Guid? shiftId = null, RotaStatus? status = null);
         Task<IEnumerable<Rota>> GetRotasByTeamMemberIdAsync(Guid teamMemberId);
     }
 }

@@ -29,13 +29,30 @@ namespace ShiftRotaManager.Data.Repositories
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<IEnumerable<Rota>> GetRotasByDateRangeAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<Rota>> GetRotasByDateRangeAsync(DateTime startDate, DateTime endDate, Guid? teamMemberId = null, Guid? shiftId = null, RotaStatus? status = null)
         {
-            return await _dbSet
+            var query = _dbSet
                 .Where(r => r.Date >= startDate.Date && r.Date <= endDate.Date)
                 .Include(r => r.Shift)
                 .Include(r => r.TeamMember)
-                .Include(r => r.PairedTeamMember)
+                .Include(r => r.PairedTeamMember);
+
+            if (teamMemberId.HasValue)
+            {
+                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Rota, TeamMember?>)query.Where(r => r.TeamMemberId == teamMemberId.Value || r.PairedTeamMemberId == teamMemberId.Value);
+            }
+
+            if (shiftId.HasValue)
+            {
+                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Rota, TeamMember?>)query.Where(r => r.ShiftId == shiftId.Value);
+            }
+
+            if (status.HasValue)
+            {
+                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Rota, TeamMember?>)query.Where(r => r.Status == status.Value);
+            }
+
+            return await query
                 .OrderBy(r => r.Date)
                 .ThenBy(r => r.Shift.StartTime)
                 .ToListAsync();
