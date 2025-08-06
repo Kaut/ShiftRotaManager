@@ -1,10 +1,6 @@
 using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Data.Models;
 using ShiftRotaManager.Data.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ShiftRotaManager.Core.Services
 {
@@ -31,6 +27,7 @@ namespace ShiftRotaManager.Core.Services
                 throw new ArgumentException("Invalid role ID provided.");
             }
 
+            teamMember.RoleId = roleId;
             await _teamMemberRepository.AddAsync(teamMember);
             await _teamMemberRepository.SaveChangesAsync(); // Save team member first to get its ID
 
@@ -41,7 +38,18 @@ namespace ShiftRotaManager.Core.Services
 
         public async Task UpdateTeamMemberAsync(TeamMember teamMember)
         {
-            _teamMemberRepository.Update(teamMember);
+            var existingTeamMember = await _teamMemberRepository.GetByIdAsync(teamMember.Id);
+            if (existingTeamMember == null)
+            {
+                throw new ArgumentException("Team Member not found for update.");
+            }
+
+            existingTeamMember.FirstName = teamMember.FirstName;
+            existingTeamMember.LastName = teamMember.LastName;
+            existingTeamMember.Email = teamMember.Email;
+            existingTeamMember.RoleId = teamMember.RoleId;
+            
+            _teamMemberRepository.Update(existingTeamMember);
             await _teamMemberRepository.SaveChangesAsync();
         }
 

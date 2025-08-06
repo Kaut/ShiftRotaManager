@@ -30,6 +30,12 @@ namespace ShiftRotaManager.Data.Data
             base.OnModelCreating(modelBuilder);
 
             // Configure relationships
+            modelBuilder.Entity<TeamMember>()
+                .HasOne(tm => tm.Role)
+                .WithMany() // Or .WithMany(r => r.TeamMembers) if Role had a collection of TeamMembers
+                .HasForeignKey(tm => tm.RoleId)
+                .IsRequired(); // RoleId is required
+
             modelBuilder.Entity<ShiftVariant>()
                 .HasOne(sv => sv.BaseShift)
                 .WithMany(s => s.Variants)
@@ -64,9 +70,14 @@ namespace ShiftRotaManager.Data.Data
                 .HasForeignKey(ur => ur.RoleId);
 
             // Seed initial roles
+            //SeedData(modelBuilder); EF SQL Server
+        }
+
+        private static void SeedData(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = Guid.Parse("A0000000-0000-0000-0000-000000000001"), Name = "Admin" },
-                new Role { Id = Guid.Parse("A0000000-0000-0000-0000-000000000002"), Name = "User" },
+                new Role { Id = Guid.Parse("A0000000-0000-0000-0000-000000000001"), Name = "Manager" },
+                new Role { Id = Guid.Parse("A0000000-0000-0000-0000-000000000002"), Name = "Engineer" },
                 new Role { Id = Guid.Parse("A0000000-0000-0000-0000-000000000003"), Name = "Reader" }
             );
 
