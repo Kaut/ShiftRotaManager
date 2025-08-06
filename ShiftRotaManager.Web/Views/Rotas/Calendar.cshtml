@@ -1,76 +1,207 @@
 @{
     ViewData["Title"] = "Rota Calendar";
 }
-
-<h1 class="text-center mb-4">Rota Calendar</h1>
-
-<div id='calendar' class="shadow-sm rounded-3 p-3 bg-white"></div>
-
+ 
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Rota Calendar</h1>
+        <a href="@Url.Action("Create", "Rotas")" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus me-2"></i>New Rota
+        </a>
+    </div>
+ 
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div id="calendar-container" style="position: relative;">
+                <div id="calendar-loading" class="text-center" style="display:none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading Calendar...</p>
+                </div>
+                <div id='calendar'></div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+ 
 @section Scripts {
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
-    <!-- FullCalendar JS -->
+    <!-- FullCalendar JS and CSS from CDN -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js'></script>
-
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
+ 
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+ 
+    <style>
+        .fc-event {
+            cursor: pointer;
+            border: none !important; /* Override default border */
+            padding: 2px 4px;
+            font-size: 0.85em;
+        }
+ 
+        .fc-event-main {
+            padding: 2px 4px;
+        }
+ 
+        .fc-event-title {
+            font-weight: 500;
+            white-space: normal; /* Allow event titles to wrap */
+        }
+ 
+        /* Custom styles for event status */
+        .fc-event-status-open {
+            border-left: 4px solid #ffc107 !important; /* Bootstrap warning color */
+            background-color: #fff3cd !important;
+            color: #664d03 !important;
+        }
+ 
+        /* Custom styles for different covered shifts */
+        .fc-event-shift-morning {
+            border-left: 4px solid #0dcaf0 !important; /* Bootstrap info color */
+            background-color: #cff4fc !important;
+            color: #055160 !important;
+        }
+ 
+        .fc-event-shift-evening {
+            border-left: 4px solid #fd7e14 !important; /* Bootstrap orange */
+            background-color: #ffe5d0 !important;
+            color: #612d00 !important;
+        }
+ 
+        .fc-event-shift-night {
+            border-left: 4px solid #6f42c1 !important; /* Bootstrap purple */
+            background-color: #e2d9f3 !important;
+            color: #2c1a4d !important;
+        }
+ 
+        /* Custom style for days with no rota events */
+        .fc-day-no-events .fc-daygrid-day-frame {
+            background-color: #f8f9fa; /* A light grey background */
+        }
+    </style>
+ 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth', // Default view
+            const calendarEl = document.getElementById('calendar');
+            const loadingEl = document.getElementById('calendar-loading');
+ 
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay' // Views available
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                locale: 'en-gb', // Or your preferred locale
-                editable: false, // Set to true if you want drag-and-drop editing
+                locale: 'en-gb',
+                editable: false,
                 selectable: true,
+                dayMaxEvents: true, // for better responsiveness on small screens
+ 
+                // Show loading indicator while fetching events
+                loading: function(isLoading) {
+                    loadingEl.style.display = isLoading ? 'block' : 'none';
+                },
+ 
+                // Click on a date to create a new Rota
+                dateClick: function(info) {
+                    // Redirect to the Create page with the selected date
+                    const createUrl = new URL('@Url.Action("Create", "Rotas")', window.location.origin);
+                    createUrl.searchParams.append('date', info.dateStr);
+                    window.location.href = createUrl.href;
+                },
+ 
+                // This callback runs after events have been fetched and rendered.
+                // It's the reliable way to style days based on whether they have events.
+                eventsSet: function(info) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0); // Normalize to the start of the day
+
+                    document.querySelectorAll('.fc-daygrid-day').forEach(function(dayEl) {
+                        const dateStr = dayEl.getAttribute('data-date');
+                        if (!dateStr) return;
+
+                        const date = new Date(dateStr + 'T00:00:00'); // Avoid timezone issues
+
+                        // Only style future or present days
+                        if (date < today) {
+                            dayEl.classList.remove('fc-day-no-events');
+                            return;
+                        }
+
+                        // Fix: Check if info.events is defined and is an array
+                        const dayHasEvents = Array.isArray(info.events) && info.events.some(event => {
+                            const eventStart = event.start;
+                            if (!eventStart) return false;
+                            // Compare YYYY-MM-DD strings to ignore time
+                            return eventStart.toISOString().split('T')[0] === dateStr;
+                        });
+
+                        if (!dayHasEvents) {
+                            dayEl.classList.add('fc-day-no-events');
+                        } else {
+                            dayEl.classList.remove('fc-day-no-events');
+                        }
+                    });
+                },
+
+                // Click on an event to edit
                 eventClick: function(info) {
-                    // Redirect to the event's URL (Rota Edit page)
+                    info.jsEvent.preventDefault(); // prevent browser from following link in current tab.
                     if (info.event.url) {
                         window.location.href = info.event.url;
-                        info.jsEvent.preventDefault(); // Prevent default browser action
                     }
                 },
-                // Fetch events from your API endpoint
+ 
+                // Fetch events from the API
                 events: {
                     url: '@Url.Action("GetCalendarRotas", "Rotas")',
-                    method: 'GET',
-                    extraParams: function() {
-                        // You can add extra parameters here if needed, e.g., filters
-                        return {};
-                    },
                     failure: function(failureInfo) {
-                        console.error('There was an error while fetching rotas:', failureInfo.error);
-                        alert('There was an error fetching the rota data. Please check the console for details.');
+                        console.error('Error fetching rotas:', failureInfo.error);
+                        calendarEl.innerHTML = `<div class="alert alert-danger" role="alert">
+                                                    <strong>Error:</strong> Could not load rota data. Please try refreshing the page.
+                                                </div>`;
                     }
                 },
-                // Customize event rendering for better display
+ 
+                // Add CSS classes to events based on their properties for easier styling
+                eventClassNames: function(arg) {
+                    const status = arg.event.extendedProps.status?.toLowerCase();
+                    const shiftName = arg.event.extendedProps.shiftName?.toLowerCase();
+                    
+                    if (!status) return [];
+
+                    let classNames = [`fc-event-status-${status}`];
+
+                    if (status === 'covered' && shiftName) {
+                        if (shiftName.includes('morning')) {
+                            classNames.push('fc-event-shift-morning');
+                        } else if (shiftName.includes('evening')) {
+                            classNames.push('fc-event-shift-evening');
+                        } else if (shiftName.includes('night')) {
+                            classNames.push('fc-event-shift-night');
+                        }
+                    }
+                    return classNames;
+                },
+ 
+                // Customize the inner content of an event for a cleaner look
                 eventContent: function(arg) {
-                    let title = arg.event.title;
-                    let timeText = arg.timeText ? `<div class="fc-event-time">${arg.timeText}</div>` : '';
-
-                    let eventEl = document.createElement('div');
-                    eventEl.innerHTML = `${timeText}<div class="fc-event-title">${title}</div>`;
-
-                    // You can add more complex styling or icons here based on arg.event.extendedProps
-                    // For example, if you passed 'status' in extendedProps:
-                    if (arg.event.extendedProps.status === 'Open') {
-                        eventEl.style.borderLeft = '5px solid orange';
-                    }
-
-                    return { domNodes: [eventEl] };
-                },
-                // Optional: Customize event colors based on status (already handled in C# for simplicity)
-                // eventDidMount: function(info) {
-                //     if (info.event.extendedProps.status === 'Open') {
-                //         info.el.style.backgroundColor = 'orange';
-                //         info.el.style.borderColor = 'darkorange';
-                //     }
-                // }
+                    let titleEl = document.createElement('div');
+                    titleEl.classList.add('fc-event-title');
+                    titleEl.innerHTML = arg.event.title; // Use innerHTML to render potential icons from title
+ 
+                    let timeEl = document.createElement('div');
+                    timeEl.classList.add('fc-event-time');
+                    timeEl.innerText = arg.timeText;
+ 
+                    return { domNodes: [timeEl, titleEl] };
+                }
             });
-
+ 
             calendar.render();
         });
     </script>

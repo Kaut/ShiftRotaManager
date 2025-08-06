@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Data.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ShiftRotaManager.Web.Controllers
 {
@@ -34,7 +31,7 @@ namespace ShiftRotaManager.Web.Controllers
         // POST: TeamMembers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email")] TeamMember teamMember, Guid RoleId)
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,RoleId")] TeamMember teamMember, Guid RoleId)
         {
             if (ModelState.IsValid)
             {
@@ -70,13 +67,14 @@ namespace ShiftRotaManager.Web.Controllers
                 return NotFound();
             }
             // Note: Updating roles would require more complex logic here, e.g., fetching current user roles
+            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
             return View(teamMember);
         }
 
         // POST: TeamMembers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FirstName,LastName,Email")] TeamMember teamMember)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FirstName,LastName,Email,RoleId")] TeamMember teamMember)
         {
             if (id != teamMember.Id)
             {
@@ -90,11 +88,17 @@ namespace ShiftRotaManager.Web.Controllers
                     await _teamMemberService.UpdateTeamMemberAsync(teamMember);
                     return RedirectToAction(nameof(Index));
                 }
-                catch (Exception)
+                catch (ArgumentException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (Exception e)
                 {
                     ModelState.AddModelError(string.Empty, "An error occurred while updating the team member.");
                 }
             }
+            // Repopulate the roles for the dropdown if we return to the view
+            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
             return View(teamMember);
         }
 
@@ -120,6 +124,12 @@ namespace ShiftRotaManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
+           
+            var teamMember = await _teamMemberService.GetTeamMemberByIdAsync(id);
+            if (teamMember == null)
+            {
+                return NotFound();
+            }
             await _teamMemberService.DeleteTeamMemberAsync(id);
             return RedirectToAction(nameof(Index));
         }
