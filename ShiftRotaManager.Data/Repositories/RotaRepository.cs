@@ -31,26 +31,30 @@ namespace ShiftRotaManager.Data.Repositories
 
         public async Task<IEnumerable<Rota>> GetRotasByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            return await _dbSet
+            var rotas = await _dbSet
                 .Where(r => r.Date >= startDate.Date && r.Date <= endDate.Date)
                 .Include(r => r.Shift)
                 .Include(r => r.TeamMember)
                 .Include(r => r.PairedTeamMember)
-                .OrderBy(r => r.Date)
-                .ThenBy(r => r.Shift.StartTime)
                 .ToListAsync();
+
+            // The ThenBy clause on a navigation property's TimeSpan is not translatable to SQL for SQLite.
+            // We fetch the data first and then perform the sorting in-memory.
+            return rotas.OrderBy(r => r.Date).ThenBy(r => r.Shift.StartTime);
         }
 
         public async Task<IEnumerable<Rota>> GetRotasByTeamMemberIdAsync(Guid teamMemberId)
         {
-            return await _dbSet
+            var rotas = await _dbSet
                 .Where(r => r.TeamMemberId == teamMemberId || r.PairedTeamMemberId == teamMemberId)
                 .Include(r => r.Shift)
                 .Include(r => r.TeamMember)
                 .Include(r => r.PairedTeamMember)
-                .OrderBy(r => r.Date)
-                .ThenBy(r => r.Shift.StartTime)
                 .ToListAsync();
+
+            // The ThenBy clause on a navigation property's TimeSpan is not translatable to SQL for SQLite.
+            // We fetch the data first and then perform the sorting in-memory.
+            return rotas.OrderBy(r => r.Date).ThenBy(r => r.Shift.StartTime);
         }
     }
 }

@@ -16,5 +16,12 @@ namespace ShiftRotaManager.Data.Repositories
         {
             return await _dbSet.Include(tm => tm.UserRoles).ThenInclude(ur => ur.Role).ToListAsync();
         }
+        public async Task<TeamMember?> GetTeamMemberByIdWithDetailsAsync(Guid id)
+        {
+            return await _dbSet
+                .Include(tm => tm.Role) 
+                .FirstOrDefaultAsync(tm => tm.Id == id);
+        }
+
     }
 }
