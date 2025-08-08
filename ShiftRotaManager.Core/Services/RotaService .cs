@@ -44,14 +44,7 @@ namespace ShiftRotaManager.Core.Services
             }
 
             // If paired team member is assigned, ensure they exist
-            if (rota.PairedTeamMemberId.HasValue)
-            {
-                var pairedTeamMember = await _teamMemberRepository.GetByIdAsync(rota.PairedTeamMemberId.Value);
-                if (pairedTeamMember == null)
-                {
-                    throw new ArgumentException("Invalid Paired Team Member ID provided.");
-                }
-            }
+            await IsPairedTeamMemberExist(rota.PairedTeamMembers);
 
             await _rotaRepository.AddAsync(rota);
             await _rotaRepository.SaveChangesAsync();
@@ -69,8 +62,10 @@ namespace ShiftRotaManager.Core.Services
             existingRota.Date = rota.Date;
             existingRota.ShiftId = rota.ShiftId;
             existingRota.TeamMemberId = rota.TeamMemberId;
-            existingRota.PairedTeamMemberId = rota.PairedTeamMemberId;
+            existingRota.PairedTeamMembers = rota.PairedTeamMembers ?? new List<TeamMember>();
             existingRota.Status = rota.TeamMemberId.HasValue ? RotaStatus.Assigned : RotaStatus.Open; // Re-evaluate status
+
+            await IsPairedTeamMemberExist(existingRota.PairedTeamMembers);
 
             // Basic validation: Ensure Shift exists
             var shift = await _shiftRepository.GetByIdAsync(existingRota.ShiftId);
@@ -89,18 +84,20 @@ namespace ShiftRotaManager.Core.Services
                 }
             }
 
-            // If paired team member is assigned, ensure they exist
-            if (existingRota.PairedTeamMemberId.HasValue)
+            _rotaRepository.Update(existingRota);
+            await _rotaRepository.SaveChangesAsync();
+        }
+
+        private async Task IsPairedTeamMemberExist(IEnumerable<TeamMember>? pairedTeamMembers)
+        {
+            foreach (var pairedMember in pairedTeamMembers ?? [])
             {
-                var pairedTeamMember = await _teamMemberRepository.GetByIdAsync(existingRota.PairedTeamMemberId.Value);
+                var pairedTeamMember = await _teamMemberRepository.GetByIdAsync(pairedMember.Id);
                 if (pairedTeamMember == null)
                 {
                     throw new ArgumentException("Invalid Paired Team Member ID provided.");
                 }
             }
-
-            _rotaRepository.Update(existingRota);
-            await _rotaRepository.SaveChangesAsync();
         }
 
         public async Task DeleteRotaAsync(Guid id)
@@ -120,7 +117,13 @@ namespace ShiftRotaManager.Core.Services
 
         public async Task<Rota?> GetRotaByIdAsync(Guid id)
         {
-            return await _rotaRepository.GetRotaByIdWithDetailsAsync(id);
+            var rota = await _rotaRepository.GetRotaByIdWithDetailsAsync(id);
+            if (rota != null)
+            {
+                rota.SelectedPairedTeamMemberIds = rota.PairedTeamMembers.Select(x => x.Id).ToList();
+            }
+
+            return rota;
         }
 
         public async Task AssignOpenShiftAsync(Guid rotaId, Guid teamMemberId)

@@ -13,5 +13,6 @@ namespace ShiftRotaManager.Core.Interfaces
         Task UpdateTeamMemberAsync(TeamMember teamMember);
         Task DeleteTeamMemberAsync(Guid id);
         Task<IEnumerable<Role>> GetAllRolesAsync();
+        Task<ICollection<TeamMember>> GetTeamMembersByIdsAsync(List<Guid> pairedTeamMemberIds);
     }
 }

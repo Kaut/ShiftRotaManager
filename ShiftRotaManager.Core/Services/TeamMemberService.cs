@@ -1,10 +1,6 @@
 using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Data.Models;
 using ShiftRotaManager.Data.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ShiftRotaManager.Core.Services
 {
@@ -12,15 +8,12 @@ namespace ShiftRotaManager.Core.Services
     {
         private readonly ITeamMemberRepository _teamMemberRepository;
         private readonly IGenericRepository<Role> _roleRepository;
-        private readonly IGenericRepository<UserRole> _userRoleRepository;
 
         public TeamMemberService(ITeamMemberRepository teamMemberRepository,
-                                 IGenericRepository<Role> roleRepository,
-                                 IGenericRepository<UserRole> userRoleRepository)
+                                 IGenericRepository<Role> roleRepository)
         {
             _teamMemberRepository = teamMemberRepository;
             _roleRepository = roleRepository;
-            _userRoleRepository = userRoleRepository;
         }
 
         public async Task AddTeamMemberAsync(TeamMember teamMember, Guid roleId)
@@ -31,17 +24,25 @@ namespace ShiftRotaManager.Core.Services
                 throw new ArgumentException("Invalid role ID provided.");
             }
 
+            teamMember.RoleId = roleId;
             await _teamMemberRepository.AddAsync(teamMember);
-            await _teamMemberRepository.SaveChangesAsync(); // Save team member first to get its ID
-
-            var userRole = new UserRole { TeamMemberId = teamMember.Id, RoleId = roleId };
-            await _userRoleRepository.AddAsync(userRole);
-            await _userRoleRepository.SaveChangesAsync();
+            await _teamMemberRepository.SaveChangesAsync();
         }
 
         public async Task UpdateTeamMemberAsync(TeamMember teamMember)
         {
-            _teamMemberRepository.Update(teamMember);
+            var existingTeamMember = await _teamMemberRepository.GetByIdAsync(teamMember.Id);
+            if (existingTeamMember == null)
+            {
+                throw new ArgumentException("Team Member not found for update.");
+            }
+
+            existingTeamMember.FirstName = teamMember.FirstName;
+            existingTeamMember.LastName = teamMember.LastName;
+            existingTeamMember.Email = teamMember.Email;
+            existingTeamMember.RoleId = teamMember.RoleId;
+            
+            _teamMemberRepository.Update(existingTeamMember);
             await _teamMemberRepository.SaveChangesAsync();
         }
 
@@ -50,11 +51,6 @@ namespace ShiftRotaManager.Core.Services
             var teamMember = await _teamMemberRepository.GetByIdAsync(id);
             if (teamMember != null)
             {
-                // Remove associated user roles first
-                var userRoles = await _userRoleRepository.FindAsync(ur => ur.TeamMemberId == id);
-                _userRoleRepository.RemoveRange(userRoles);
-                await _userRoleRepository.SaveChangesAsync();
-
                 _teamMemberRepository.Remove(teamMember);
                 await _teamMemberRepository.SaveChangesAsync();
             }
@@ -62,7 +58,7 @@ namespace ShiftRotaManager.Core.Services
 
         public async Task<IEnumerable<TeamMember>> GetAllTeamMembersAsync()
         {
-            return await _teamMemberRepository.GetAllAsync();
+            return await _teamMemberRepository.GetTeamMembersWithRolesAsync();
         }
 
         public async Task<TeamMember?> GetTeamMemberByIdAsync(Guid id)
@@ -73,6 +69,17 @@ namespace ShiftRotaManager.Core.Services
         public async Task<IEnumerable<Role>> GetAllRolesAsync()
         {
             return await _roleRepository.GetAllAsync();
+        }
+
+        public async Task<ICollection<TeamMember>> GetTeamMembersByIdsAsync(List<Guid> pairedTeamMemberIds)
+        {
+            var teamMembers = new List<TeamMember>();
+            foreach (var id in pairedTeamMemberIds)
+            {
+                var teamMember = await _teamMemberRepository.GetByIdAsync(id);
+                if (teamMember != null) teamMembers.Add(teamMember);
+            }
+            return teamMembers;
         }
     }
 }

@@ -12,3 +12,17 @@ C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Data\obj\Deb
 C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ref\ShiftRotaManager.Data.dll
 C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Data\bin\Debug\net9.0\ShiftRotaManager.Data.runtimeconfig.json
 C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.genruntimeconfig.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\bin\Debug\net9.0\ShiftRotaManager.Data.deps.json
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\bin\Debug\net9.0\ShiftRotaManager.Data.runtimeconfig.json
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\bin\Debug\net9.0\ShiftRotaManager.Data.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\bin\Debug\net9.0\ShiftRotaManager.Data.pdb
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.csproj.AssemblyReference.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.AssemblyInfoInputs.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.AssemblyInfo.cs
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.csproj.CoreCompileInputs.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\refint\ShiftRotaManager.Data.dll
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.pdb
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ShiftRotaManager.Data.genruntimeconfig.cache
+C:\Kautilya\personal\Samples\POCs\ShiftRotaManager\ShiftRotaManager\ShiftRotaManager.Data\obj\Debug\net9.0\ref\ShiftRotaManager.Data.dll
