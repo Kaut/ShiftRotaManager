@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 // Configure Entity Framework Core with SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlite(connectionString));
 
 // Register Repositories
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -44,7 +44,7 @@ app.UseAuthorization(); // For authentication/authorization (not fully implement
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=TeamMembers}/{action=Index}/{id?}");
 
 // Apply migrations on startup (for development/testing purposes, consider alternatives for production)
 using (var scope = app.Services.CreateScope())
@@ -53,7 +53,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate(); // Apply any pending migrations
+        await context.Database.MigrateAsync(); // Apply any pending migrations
+        // Seed data
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
@@ -62,4 +64,4 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.Run();
+await app.RunAsync();

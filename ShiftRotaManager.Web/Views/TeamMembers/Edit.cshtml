@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Edit Team Member";
+    var roles = ViewBag.Roles as SelectList;
 }
 
 <h1 class="text-center mb-4">Edit Team Member</h1>
@@ -12,19 +13,24 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <input type="hidden" asp-for="Id" />
             <div class="mb-3">
-                <label asp-for="FirstName" class="form-label"></label>
+                <label asp-for="FirstName" class="control-label"></label>
                 <input asp-for="FirstName" class="form-control rounded" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="LastName" class="form-label"></label>
+                <label asp-for="LastName" class="control-label"></label>
                 <input asp-for="LastName" class="form-control rounded" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
+                <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control rounded" />
                 <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="RoleId" class="control-label">Role</label>
+                <select asp-for="RoleId" class="form-control rounded" asp-items="roles"></select>
+                <span asp-validation-for="RoleId" class="text-danger"></span>
             </div>
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>

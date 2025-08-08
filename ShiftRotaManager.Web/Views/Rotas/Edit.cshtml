@@ -29,11 +29,32 @@
                 <span asp-validation-for="TeamMemberId" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="PairedTeamMemberId" class="form-label">Paired Team Member (Optional, for training)</label>
-                <select asp-for="PairedTeamMemberId" class="form-control rounded" asp-items="ViewBag.PairedTeamMembers">
-                    <option value="">-- Select Paired Team Member --</option>
-                </select>
-                <span asp-validation-for="PairedTeamMemberId" class="text-danger"></span>
+                <label asp-for="SelectedPairedTeamMemberIds" class="form-label">Paired Team Members (Optional)</label>
+                <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                    @{
+                        // Cast the ViewBag data to the expected type.
+                        var teamMembersList = ViewBag.TeamMembers as IEnumerable<SelectListItem>;
+                        if (teamMembersList != null)
+                        {
+                            // Loop through each team member to create a checkbox.
+                            foreach (var member in teamMembersList)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="SelectedPairedTeamMemberIds"
+                                           value="@member.Value"
+                                           id="paired_@member.Value"
+                                           checked="@(Model.SelectedPairedTeamMemberIds?.Contains(Guid.Parse(member.Value)) ?? false)" />
+                                    <label class="form-check-label" for="paired_@member.Value">
+                                        @member.Text
+                                    </label>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+                <span asp-validation-for="SelectedPairedTeamMemberIds" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Status" class="form-label"></label>

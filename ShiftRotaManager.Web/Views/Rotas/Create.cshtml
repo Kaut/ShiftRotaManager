@@ -28,11 +28,11 @@
                 <span asp-validation-for="TeamMemberId" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="PairedTeamMemberId" class="form-label">Paired Team Member (Optional, for training)</label>
-                <select asp-for="PairedTeamMemberId" class="form-control rounded" asp-items="ViewBag.PairedTeamMembers">
-                    <option value="">-- Select Paired Team Member --</option>
+                <label asp-for="SelectedPairedTeamMemberIds" class="form-label">Paired Team Members (Optional)</label>
+                <select asp-for="SelectedPairedTeamMemberIds" class="form-control rounded"  asp-items="ViewBag.TeamMembers" multiple="multiple">
+                    <option value="">-- Select Paired Team Members --</option>
                 </select>
-                <span asp-validation-for="PairedTeamMemberId" class="text-danger"></span>
+                <span asp-validation-for="SelectedPairedTeamMemberIds" class="text-danger"></span>
             </div>
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary rounded-pill">Create Rota</button>

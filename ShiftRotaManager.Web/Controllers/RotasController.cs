@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Data.Models;
+using ShiftRotaManager.Web.Models;
 
 namespace ShiftRotaManager.Web.Controllers
 {
@@ -38,7 +39,7 @@ namespace ShiftRotaManager.Web.Controllers
         // POST: Rotas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Date,ShiftId,TeamMemberId,PairedTeamMemberId")] Rota rota)
+        public async Task<IActionResult> Create([Bind("Date,ShiftId,TeamMemberId,SelectedPairedTeamMemberIds")] RotaViewModel model)
         {
             // ModelState.IsValid check usually happens here, but for simplicity in POC,
             // we'll rely on service layer validation for now.
@@ -46,6 +47,14 @@ namespace ShiftRotaManager.Web.Controllers
 
             try
             {
+                var rota = new Rota
+                {
+                    Date = model.Date,
+                    ShiftId = model.ShiftId,
+                    TeamMemberId = model.TeamMemberId,
+                    PairedTeamMembers = await _teamMemberService.GetTeamMembersByIdsAsync(model.SelectedPairedTeamMemberIds)
+                };
+
                 await _rotaService.AddRotaAsync(rota);
                 return RedirectToAction(nameof(Index));
             }
@@ -62,10 +71,10 @@ namespace ShiftRotaManager.Web.Controllers
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred while adding the rota.");
             }
 
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", rota.ShiftId);
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.TeamMemberId);
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.PairedTeamMemberId);
-            return View(rota);
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", model.ShiftId);
+            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", model.TeamMemberId);
+            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", model.SelectedPairedTeamMemberIds);
+            return View(model);
         }
 
         // GET: Rotas/Edit/5
@@ -81,19 +90,19 @@ namespace ShiftRotaManager.Web.Controllers
             {
                 return NotFound();
             }
-
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
             ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", rota.ShiftId);
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.TeamMemberId);
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.PairedTeamMemberId);
+            ViewBag.TeamMembers = new SelectList(teamMembers, "Id", "FirstName", rota.TeamMemberId);
+            ViewBag.PairedTeamMembers = new SelectList(teamMembers, "Id", "FirstName", rota.PairedTeamMembers?.Select(x => x.Id));
             return View(rota);
         }
 
         // POST: Rotas/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Date,ShiftId,TeamMemberId,PairedTeamMemberId")] Rota rota)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Date,ShiftId,TeamMemberId,SelectedPairedTeamMemberIds")] RotaViewModel model)
         {
-            if (id != rota.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
@@ -101,6 +110,19 @@ namespace ShiftRotaManager.Web.Controllers
             // ModelState.IsValid check usually happens here
             try
             {
+                var rota = await _rotaService.GetRotaByIdAsync(id);
+                if (rota == null)
+                {
+                    return NotFound();
+                }
+
+                // Update properties
+                rota.Date = model.Date;
+                rota.ShiftId = model.ShiftId;
+                rota.TeamMemberId = model.TeamMemberId;
+                rota.PairedTeamMembers = await _teamMemberService.GetTeamMembersByIdsAsync(model.SelectedPairedTeamMemberIds);
+
+
                 await _rotaService.UpdateRotaAsync(rota);
                 return RedirectToAction(nameof(Index));
             }
@@ -117,10 +139,11 @@ namespace ShiftRotaManager.Web.Controllers
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred while updating the rota.");
             }
 
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", rota.ShiftId);
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.TeamMemberId);
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.PairedTeamMemberId);
-            return View(rota);
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", model.ShiftId);
+            ViewBag.TeamMembers = new SelectList(teamMembers, "Id", "FirstName", model.TeamMemberId);
+            ViewBag.PairedTeamMembers = new SelectList( teamMembers, "Id", "FirstName", model.SelectedPairedTeamMemberIds);
+            return View(model);
         }
 
         // GET: Rotas/Delete/5
@@ -220,9 +243,9 @@ namespace ShiftRotaManager.Web.Controllers
                     title += " (Open)";
                 }
 
-                if (r.PairedTeamMember != null)
+                foreach (var p in r.PairedTeamMembers ?? [])
                 {
-                    title += $" w/ {r.PairedTeamMember.FirstName}";
+                    title += $" w/ {p.FirstName} {p.LastName}";
                 }
 
                 // FullCalendar expects 'start' and 'end' in ISO 8601 format
@@ -247,9 +270,9 @@ namespace ShiftRotaManager.Web.Controllers
                 {
                     backgroundColor = "#dc3545"; // Red for leave/illness
                 }
-                else if (r.PairedTeamMemberId.HasValue)
+                else if (r.PairedTeamMembers != null && r.PairedTeamMembers.Count > 0)
                 {
-                    backgroundColor = "#28a745"; // Green for paired/training
+                    backgroundColor = "#28a745"; // Green for paired
                 }
 
 
