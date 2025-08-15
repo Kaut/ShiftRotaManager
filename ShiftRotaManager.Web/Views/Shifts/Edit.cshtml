@@ -4,47 +4,55 @@
     ViewData["Title"] = "Edit Shift";
 }
 
-<h1 class="text-center mb-4">Edit Shift</h1>
-
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control rounded" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="col-lg-6 col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mb-0">Edit Shift</h1>
+            <a asp-action="Index" class="btn btn-light rounded-circle" data-bs-toggle="tooltip" title="Back">
+                    <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control rounded" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="StartTime" class="form-label"></label>
+                        <input asp-for="StartTime" type="time" class="form-control rounded" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="EndTime" class="form-label"></label>
+                        <input asp-for="EndTime" type="time" class="form-control rounded" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input rounded" asp-for="IsNightShift" />
+                        <label class="form-check-label" asp-for="IsNightShift"></label>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="MinStaffRequired" class="form-label"></label>
+                        <input asp-for="MinStaffRequired" type="number" class="form-control rounded" />
+                        <span asp-validation-for="MinStaffRequired" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="MaxStaffAllowed" class="form-label"></label>
+                        <input asp-for="MaxStaffAllowed" type="number" class="form-control rounded" />
+                        <span asp-validation-for="MaxStaffAllowed" class="text-danger"></span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label asp-for="StartTime" class="form-label"></label>
-                <input asp-for="StartTime" type="time" class="form-control rounded" />
-                <span asp-validation-for="StartTime" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="EndTime" class="form-label"></label>
-                <input asp-for="EndTime" type="time" class="form-control rounded" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-            </div>
-            <div class="mb-3 form-check">
-                <input class="form-check-input rounded" asp-for="IsNightShift" />
-                <label class="form-check-label" asp-for="IsNightShift"></label>
-            </div>
-            <div class="mb-3">
-                <label asp-for="MinStaffRequired" class="form-label"></label>
-                <input asp-for="MinStaffRequired" type="number" class="form-control rounded" />
-                <span asp-validation-for="MinStaffRequired" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="MaxStaffAllowed" class="form-label"></label>
-                <input asp-for="MaxStaffAllowed" type="number" class="form-control rounded" />
-                <span asp-validation-for="MaxStaffAllowed" class="text-danger"></span>
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary rounded-pill">Save Changes</button>
-                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to List</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 

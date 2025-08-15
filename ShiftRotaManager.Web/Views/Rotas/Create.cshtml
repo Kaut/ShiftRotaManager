@@ -1,47 +1,334 @@
-@model ShiftRotaManager.Data.Models.Rota
+@model ShiftRotaManager.Web.Models.CreateRotaViewModel
 
 @{
-    ViewData["Title"] = "Create Rota Assignment";
+    ViewData["Title"] = "Create Rota";
 }
 
-<h1 class="text-center mb-4">Create Rota Assignment</h1>
-
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <div class="mb-3">
-                <label asp-for="Date" class="form-label"></label>
-                <input asp-for="Date" type="date" class="form-control rounded" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="ShiftId" class="form-label">Shift</label>
-                <select asp-for="ShiftId" class="form-control rounded" asp-items="ViewBag.Shifts"></select>
-                <span asp-validation-for="ShiftId" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="TeamMemberId" class="form-label">Assigned Team Member (Optional, leave blank for Open Shift)</label>
-                <select asp-for="TeamMemberId" class="form-control rounded" asp-items="ViewBag.TeamMembers">
-                    <option value="">-- Select Team Member --</option>
-                </select>
-                <span asp-validation-for="TeamMemberId" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="PairedTeamMemberId" class="form-label">Paired Team Member (Optional, for training)</label>
-                <select asp-for="PairedTeamMemberId" class="form-control rounded" asp-items="ViewBag.PairedTeamMembers">
-                    <option value="">-- Select Paired Team Member --</option>
-                </select>
-                <span asp-validation-for="PairedTeamMemberId" class="text-danger"></span>
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary rounded-pill">Create Rota</button>
-                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to List</a>
-            </div>
-        </form>
+    <div class="col-lg-6 col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mb-0">Create New Rota</h1>
+            <a asp-action="Calendar" class="btn btn-light rounded-circle" data-bs-toggle="tooltip" title="Back">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="StartDate" class="form-label"></label>
+                        <input asp-for="StartDate" id="StartDate" type="date" class="form-control" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="EndDate" class="form-label"></label>
+                        <input asp-for="EndDate" id="EndDate" type="date" class="form-control" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Your shift dropdown is now only used for manual creation -->
+                <div id="manual-shift-dropdown" style="display:none;">
+                    <div class="mb-3">
+                        <label asp-for="ShiftId" class="form-label">Shift</label>
+                        <select asp-for="ShiftId" id="ShiftId" asp-items="Model.Shifts" class="form-control">
+                            <option value="">-- Select Shift --</option>
+                        </select>
+                        <span asp-validation-for="ShiftId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <!-- The suggestions container, with the toggle button -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    @* <h3 class="mb-0">Suggested Rota Assignments</h3> *@
+                     <div>
+                        <button id="toggle-suggestions-btn" type="button" class="btn btn-secondary shadow-sm rounded-pill" style="display:none;">
+                            <i class="fas fa-times me-2"></i>Ignore Suggestions
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button id="toggle-expand-btn" type="button" class="btn btn-primary btn-sm text-start" style="display: none;">
+                        <i class="fas fa-plus-square me-1"></i>Expand All                        
+                    </button>
+                </div>
+                <div id="collapsed-message-container" class="alert alert-info text-center d-none" role="alert">
+                    There are recommendations to see. Click "Expand All" to view them.
+                </div>
+                
+
+                <div id="suggestions-container" class="mt-4">
+                    <div class="alert alert-info text-center" role="alert">
+                        Please select a <strong>Date Range</strong> to see member suggestions.
+                    </div>
+                </div>
+
+                <!-- The manual creation form, which is shown when suggestions are ignored -->
+                <div id="manual-creation-container" class="mt-4" style="display:none;">
+                    <div class="alert alert-warning" role="alert">
+                        You are in <strong>Manual Selection Mode</strong>. The rota suggestions are hidden.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="TeamMemberId" class="form-label">Team Member</label>
+                        <select asp-for="TeamMemberId" id="TeamMemberId" asp-items="Model.TeamMembers" class="form-control">
+                            <option value="">-- Select Team Member --</option>
+                        </select>
+                        <span asp-validation-for="TeamMemberId" class="text-danger"></span>
+                        <div class="form-text">Leave this blank to create an open shift.</div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="SelectedPairedTeamMemberIds" class="form-label">Paired Team Members (Optional)</label>
+                        <select asp-for="SelectedPairedTeamMemberIds" class="form-control rounded" asp-items="Model.TeamMembers" multiple="multiple">
+                            <option value="">-- Select Paired Team Members --</option>
+                        </select>
+                        <span asp-validation-for="SelectedPairedTeamMemberIds" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsOpenShift" id="IsOpenShift" class="form-check-input" type="checkbox" />
+                        <label asp-for="IsOpenShift" class="form-check-label">Create an Open Shift</label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg mt-3">Create Rota(s)</button>
+                </div>
+            </form>
+        </div>
+    </div>
     </div>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('StartDate');
+        const endDateInput = document.getElementById('EndDate');
+        const suggestionsContainer = document.getElementById('suggestions-container');
+        const collapsedMessageContainer = document.getElementById('collapsed-message-container');
+        const manualCreationContainer = document.getElementById('manual-creation-container');
+        const manualShiftDropdown = document.getElementById('manual-shift-dropdown');
+        const toggleSuggestionsBtn = document.getElementById('toggle-suggestions-btn');
+        // The new single button for expand/collapse
+        const toggleExpandBtn = document.getElementById('toggle-expand-btn');
+
+        let isSuggestionsMode = true;
+
+        // Handle the suggestions/manual mode toggle button click
+        toggleSuggestionsBtn.addEventListener('click', function() {
+            isSuggestionsMode = !isSuggestionsMode;
+            if (isSuggestionsMode) {
+                // Show suggestions UI
+                suggestionsContainer.style.display = 'block';
+                manualCreationContainer.style.display = 'none';
+                manualShiftDropdown.style.display = 'none';
+                toggleSuggestionsBtn.innerHTML = '<i class="fas fa-times me-2"></i>Ignore Suggestions';
+                toggleSuggestionsBtn.classList.remove('btn-warning');
+                toggleSuggestionsBtn.classList.add('btn-secondary');
+                updateRotaAssignments(); // Re-fetch suggestions
+            } else {
+                // Show manual creation UI
+                suggestionsContainer.style.display = 'none';
+                manualCreationContainer.style.display = 'block';
+                manualShiftDropdown.style.display = 'block';
+                toggleSuggestionsBtn.innerHTML = '<i class="fas fa-arrow-left me-2"></i>Show Suggestions';
+                toggleSuggestionsBtn.classList.remove('btn-secondary');
+                toggleSuggestionsBtn.classList.add('btn-warning');
+                toggleExpandBtn.style.display = 'none';
+                collapsedMessageContainer.style.display = 'none';
+                suggestionsContainer.innerHTML = '';
+            }
+        });
+
+        // New event listener for the single expand/collapse toggle button
+        toggleExpandBtn.addEventListener('click', function() {
+            const suggestionCollapses = document.querySelectorAll('.suggestion-collapse');
+            const isExpanded = suggestionCollapses.length > 0 && suggestionCollapses[0].classList.contains('show');
+
+            if (isExpanded) {
+                // If expanded, collapse all
+                suggestionCollapses.forEach(collapse => {
+                    new bootstrap.Collapse(collapse, { toggle: false }).hide();
+                });
+                toggleExpandBtn.innerHTML = '<i class="fas fa-plus-square me-1"></i> Expand All';
+                suggestionsContainer.style.display = 'none'; // Hide the entire container
+                collapsedMessageContainer.classList.remove('d-none');
+            } else {
+                // If collapsed, expand all
+                suggestionCollapses.forEach(collapse => {
+                    new bootstrap.Collapse(collapse, { toggle: false }).show();
+                });
+                toggleExpandBtn.innerHTML = '<i class="fas fa-minus-square me-1"></i> Collapse All';
+                suggestionsContainer.style.display = 'block'; // Show the container
+                collapsedMessageContainer.classList.add('d-none');
+            }
+        });
+
+        function updateRotaAssignments() {
+            if (!isSuggestionsMode || !startDateInput.value || !endDateInput.value) {
+                if (!startDateInput.value || !endDateInput.value) {
+                    suggestionsContainer.innerHTML = `
+                        <div class="alert alert-info text-center rounded-3 shadow-sm" role="alert">
+                            Please select a <strong>Date Range</strong> to see member suggestions.
+                        </div>
+                    `;
+                }
+                toggleSuggestionsBtn.style.display = 'none';
+                toggleExpandBtn.style.display = 'none';
+                collapsedMessageContainer.classList.add('d-none');
+                return;
+            }
+
+            toggleSuggestionsBtn.style.display = 'inline-block';
+            toggleExpandBtn.style.display = 'inline-block';
+            collapsedMessageContainer.classList.add('d-none');
+            suggestionsContainer.style.display = 'block';
+
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            // Show a loading message while fetching
+            suggestionsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Fetching suggestions...</p>
+                </div>
+            `;
+            
+            fetch(`@Url.Action("GetRecommendedMembers", "Rotas")?startDate=${startDate}&endDate=${endDate}`)
+                .then(response => response.json())
+                .then(recommendations => {
+                    suggestionsContainer.innerHTML = '';
+                    
+                    const hasRecommendations = recommendations.some(day => day.members.length > 0);
+                    if (!hasRecommendations) {
+                        suggestionsContainer.innerHTML = `
+                            <div class="alert alert-light text-center rounded-3 shadow-sm" role="alert">
+                                No members with preferred days were found for the selected date range.
+                            </div>
+                        `;
+                        toggleExpandBtn.style.display = 'none';
+                        return;
+                    }
+
+                    recommendations.forEach((day, idx) => {
+                        const date = day.date;
+                        const members = day.members;
+                        const collapseId = `suggestion-collapse-${idx}`;
+
+                        const card = document.createElement('div');
+                        card.classList.add('card', 'shadow-sm', 'mb-3', 'suggestion-card');
+
+                        const cardHeader = document.createElement('div');
+                        cardHeader.classList.add('card-header', 'd-flex', 'justify-content-between', 'align-items-center', 'bg-light');
+                        cardHeader.innerHTML = `
+                            <button class="btn btn-link text-decoration-none text-dark fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="true" aria-controls="${collapseId}">
+                                <i class="fas fa-chevron-down me-2"></i>
+                                <span>Rota for ${date}</span>
+                            </button>
+                        `;
+
+                        const collapseDiv = document.createElement('div');
+                        collapseDiv.classList.add('collapse', 'suggestion-collapse', 'show');
+                        collapseDiv.id = collapseId;
+
+                        const cardBody = document.createElement('div');
+                        cardBody.classList.add('card-body');
+
+                        if (members.length > 0) {
+                            const memberList = document.createElement('div');
+                            memberList.classList.add('d-flex', 'flex-wrap');
+                            members.forEach((member, memberIndex) => {
+                                const memberPill = document.createElement('div');
+                                memberPill.classList.add('badge', 'bg-primary', 'text-white', 'me-2', 'mb-2', 'p-2', 'rounded-pill');
+                                memberPill.innerHTML = `
+                                    ${member.name}
+                                    <span class="opacity-75">(Preferred: ${member.preferredDay} / ${member.preferredShiftName})</span>
+                                `;
+                                
+                                // Hidden inputs for form submission
+                                const hiddenDateInput = document.createElement('input');
+                                hiddenDateInput.type = 'hidden';
+                                hiddenDateInput.name = `SuggestedRotas[${date}][${memberIndex}].Date`;
+                                hiddenDateInput.value = date;
+                                memberPill.appendChild(hiddenDateInput);
+
+                                const hiddenMemberInput = document.createElement('input');
+                                hiddenMemberInput.type = 'hidden';
+                                hiddenMemberInput.name = `SuggestedRotas[${date}][${memberIndex}].TeamMemberId`;
+                                hiddenMemberInput.value = member.id;
+                                memberPill.appendChild(hiddenMemberInput);
+                                
+                                const hiddenShiftInput = document.createElement('input');
+                                hiddenShiftInput.type = 'hidden';
+                                hiddenShiftInput.name = `SuggestedRotas[${date}][${memberIndex}].ShiftId`;
+                                hiddenShiftInput.value = member.preferredShiftId;
+                                memberPill.appendChild(hiddenShiftInput);
+
+                                memberList.appendChild(memberPill);
+                            });
+                            cardBody.appendChild(memberList);
+                        } else {
+                            const noMembersAlert = document.createElement('div');
+                            noMembersAlert.classList.add('alert', 'alert-light', 'm-0');
+                            noMembersAlert.innerText = "No members with preferred days for this date.";
+                            cardBody.appendChild(noMembersAlert);
+                        }
+
+                        collapseDiv.appendChild(cardBody);
+                        card.appendChild(cardHeader);
+                        card.appendChild(collapseDiv);
+                        suggestionsContainer.appendChild(card);
+                    });
+
+                    // Update the button state to "Collapse All" since the new suggestions are expanded by default
+                    toggleExpandBtn.innerHTML = '<i class="fas fa-minus-square me-1"></i> Collapse All';
+                    toggleExpandBtn.style.display = 'inline-block';
+                    collapsedMessageContainer.classList.add('d-none');
+                })
+                .catch(error => {
+                    console.error('Error fetching recommended members:', error);
+                    suggestionsContainer.innerHTML = `
+                        <div class="alert alert-danger rounded-3" role="alert">
+                            An error occurred while fetching suggestions. Please try again.
+                        </div>
+                    `;
+                    toggleExpandBtn.style.display = 'none';
+                });
+        }
+
+        // Event listeners to trigger updates on any input change
+        startDateInput.addEventListener('change', updateRotaAssignments);
+        endDateInput.addEventListener('change', updateRotaAssignments);
+
+        // Listen for Bootstrap collapse events to keep the toggle button and message in sync
+        document.addEventListener('hidden.bs.collapse', function(event) {
+            const allCollapsed = Array.from(document.querySelectorAll('.suggestion-collapse')).every(el => !el.classList.contains('show'));
+            if (allCollapsed) {
+                toggleExpandBtn.innerHTML = '<i class="fas fa-plus-square me-1"></i> Expand All';
+                suggestionsContainer.style.display = 'none';
+                collapsedMessageContainer.classList.remove('d-none');
+            }
+        });
+
+        document.addEventListener('shown.bs.collapse', function(event) {
+            const anyExpanded = Array.from(document.querySelectorAll('.suggestion-collapse')).some(el => el.classList.contains('show'));
+            if (anyExpanded) {
+                toggleExpandBtn.innerHTML = '<i class="fas fa-minus-square me-1"></i> Collapse All';
+                suggestionsContainer.style.display = 'block';
+                collapsedMessageContainer.classList.add('d-none');
+            }
+        });
+
+        // Initial call
+        updateRotaAssignments();
+    });
+</script>

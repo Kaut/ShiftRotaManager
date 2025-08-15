@@ -3,6 +3,7 @@ using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Core.Services;
 using ShiftRotaManager.Data.Data;
 using ShiftRotaManager.Data.Repositories;
+using ShiftRotaManager.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,18 +13,21 @@ builder.Services.AddControllersWithViews();
 // Configure Entity Framework Core with SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlite(connectionString));
 
 // Register Repositories
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
 builder.Services.AddScoped<IRotaRepository, RotaRepository>(); // Register new Rota Repository
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+
 
 // Register Services
 builder.Services.AddScoped<IShiftService, ShiftService>();
 builder.Services.AddScoped<ITeamMemberService, TeamMemberService>();
 builder.Services.AddScoped<IRotaService, RotaService>(); // Register new Rota Service
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 var app = builder.Build();
 
@@ -44,7 +48,7 @@ app.UseAuthorization(); // For authentication/authorization (not fully implement
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
 // Apply migrations on startup (for development/testing purposes, consider alternatives for production)
 using (var scope = app.Services.CreateScope())
@@ -53,7 +57,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate(); // Apply any pending migrations
+        await context.Database.MigrateAsync(); // Apply any pending migrations
+        // Seed data
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
@@ -62,4 +68,4 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.Run();
+await app.RunAsync();

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Data.Models;
+using ShiftRotaManager.Web.Models;
 
 namespace ShiftRotaManager.Web.Controllers
 {
@@ -10,12 +11,16 @@ namespace ShiftRotaManager.Web.Controllers
         private readonly IRotaService _rotaService;
         private readonly IShiftService _shiftService;
         private readonly ITeamMemberService _teamMemberService;
+        private readonly ILogger<RotasController> _logger;
 
-        public RotasController(IRotaService rotaService, IShiftService shiftService, ITeamMemberService teamMemberService)
+        public RotasController(IRotaService rotaService,
+            IShiftService shiftService,
+            ITeamMemberService teamMemberService, ILogger<RotasController> logger)
         {
             _rotaService = rotaService;
             _shiftService = shiftService;
             _teamMemberService = teamMemberService;
+            _logger = logger;
         }
 
         // GET: Rotas
@@ -28,47 +33,112 @@ namespace ShiftRotaManager.Web.Controllers
         // GET: Rotas/Create
         public async Task<IActionResult> Create()
         {
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name");
-            // Allow null for TeamMemberId to create open shifts
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName");
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName");
-            return View();
+            var shifts = await _shiftService.GetAllShiftsAsync();
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+
+            var viewModel = new CreateRotaViewModel
+            {
+                Shifts = new SelectList(shifts, "Id", "Name"),
+                TeamMembers = new SelectList(teamMembers, "Id", "FullName")
+            };
+
+            return View(viewModel);
         }
 
         // POST: Rotas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Date,ShiftId,TeamMemberId,PairedTeamMemberId")] Rota rota)
+        public async Task<IActionResult> Create(CreateRotaViewModel viewModel)
         {
-            // ModelState.IsValid check usually happens here, but for simplicity in POC,
-            // we'll rely on service layer validation for now.
-            // For production, add Data Annotations to Rota model and check ModelState.IsValid
+            if (viewModel.EndDate < viewModel.StartDate)
+            {
+                ModelState.AddModelError("EndDate", "End Date cannot be before the Start Date.");
+            }
 
+            if (viewModel.SuggestedRotas == null || !viewModel.SuggestedRotas.Any())
+            {
+                if (!viewModel.IsOpenShift && viewModel.TeamMemberId == null)
+                {
+                    ModelState.AddModelError("TeamMemberId", "A team member must be selected for a non-open shift.");
+                }
+
+                if (!ModelState.IsValid)
+                { 
+                    await PopulateViewModelDropdowns(viewModel);
+                    return View(viewModel);
+                }
+            }
+
+            var rotas = new List<Rota>();
             try
             {
-                await _rotaService.AddRotaAsync(rota);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (ArgumentException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-            }
-            catch (Exception)
-            {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred while adding the rota.");
-            }
+                 var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+                if (viewModel.SuggestedRotas != null && viewModel.SuggestedRotas.Any())
+                {
+                    // Scenario 1: Create rotas from the suggested assignments
+                    foreach (var suggestedRotasByDay in viewModel.SuggestedRotas.Values)
+                    {
+                        foreach (var suggestedRota in suggestedRotasByDay)
+                        {
+                            var rota = rotas.FirstOrDefault(x => x.Date == suggestedRota.Date && x.ShiftId == suggestedRota.ShiftId);
 
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", rota.ShiftId);
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.TeamMemberId);
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.PairedTeamMemberId);
-            return View(rota);
+                            if (rota == null)
+                            {
+                                rotas.Add(new Rota
+                                {
+                                    Date = suggestedRota.Date,
+                                    ShiftId = suggestedRota.ShiftId,
+                                    TeamMemberId = suggestedRota.TeamMemberId
+                                });
+                            }
+                            else
+                            {
+                                rota.SelectedPairedTeamMemberIds.Add(suggestedRota.TeamMemberId);
+                                rota.PairedTeamMembers = teamMembers.Where(tm => rota.SelectedPairedTeamMemberIds.Contains(tm.Id)).ToList();
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    // Scenario 2: Fallback to manual creation for the date range
+                    rotas.Clear();
+                    for (var date = viewModel.StartDate; date <= viewModel.EndDate; date = date.AddDays(1))
+                    {
+                        rotas.Add(new Rota
+                        {
+                            Date = date,
+                            ShiftId = viewModel.ShiftId,
+                            TeamMemberId = viewModel.IsOpenShift ? null : viewModel.TeamMemberId,
+                            SelectedPairedTeamMemberIds = [.. viewModel.SelectedPairedTeamMemberIds],
+                            PairedTeamMembers = teamMembers.Where(tm => viewModel.SelectedPairedTeamMemberIds.Contains(tm.Id)).ToList()
+                        });
+                    }
+                }
+
+                await _rotaService.CreateRotasForDateRangeAsync(rotas);
+                _logger.LogInformation("Successfully created {RotaCount} rotas for date range {StartDate} to {EndDate}.", rotas.Count, viewModel.StartDate, viewModel.EndDate);
+                return RedirectToAction(nameof(Calendar));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while creating rotas for date range {StartDate} to {EndDate}.", viewModel.StartDate, viewModel.EndDate);
+                ModelState.AddModelError("", "An unexpected error occurred while creating the rotas. Please try again.");
+            }
+            await PopulateViewModelDropdowns(viewModel);
+            return View(viewModel);
         }
 
-        // GET: Rotas/Edit/5
+        private async Task PopulateViewModelDropdowns(CreateRotaViewModel viewModel)
+        {
+            var shifts = await _shiftService.GetAllShiftsAsync();
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+
+            viewModel.Shifts = new SelectList(shifts, "Id", "Name");
+            viewModel.TeamMembers = new SelectList(teamMembers, "Id", "FullName");
+        }
+
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -81,19 +151,19 @@ namespace ShiftRotaManager.Web.Controllers
             {
                 return NotFound();
             }
-
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
             ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", rota.ShiftId);
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.TeamMemberId);
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.PairedTeamMemberId);
+            ViewBag.TeamMembers = new SelectList(teamMembers, "Id", "FullName", rota.TeamMemberId);
+            ViewBag.PairedTeamMembers = new SelectList(teamMembers, "Id", "FullName", rota.PairedTeamMembers?.Select(x => x.Id));
             return View(rota);
         }
 
         // POST: Rotas/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Date,ShiftId,TeamMemberId,PairedTeamMemberId")] Rota rota)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,Date,ShiftId,TeamMemberId,SelectedPairedTeamMemberIds")] RotaViewModel model)
         {
-            if (id != rota.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
@@ -101,8 +171,21 @@ namespace ShiftRotaManager.Web.Controllers
             // ModelState.IsValid check usually happens here
             try
             {
+                var rota = await _rotaService.GetRotaByIdAsync(id);
+                if (rota == null)
+                {
+                    return NotFound();
+                }
+
+                // Update properties
+                rota.Date = model.Date;
+                rota.ShiftId = model.ShiftId;
+                rota.TeamMemberId = model.TeamMemberId;
+                rota.PairedTeamMembers = await _teamMemberService.GetTeamMembersByIdsAsync(model.SelectedPairedTeamMemberIds);
+
+
                 await _rotaService.UpdateRotaAsync(rota);
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Calendar));
             }
             catch (ArgumentException ex)
             {
@@ -117,10 +200,11 @@ namespace ShiftRotaManager.Web.Controllers
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred while updating the rota.");
             }
 
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", rota.ShiftId);
-            ViewBag.TeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.TeamMemberId);
-            ViewBag.PairedTeamMembers = new SelectList(await _teamMemberService.GetAllTeamMembersAsync(), "Id", "FirstName", rota.PairedTeamMemberId);
-            return View(rota);
+            var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", model.ShiftId);
+            ViewBag.TeamMembers = new SelectList(teamMembers, "Id", "FullName", model.TeamMemberId);
+            ViewBag.PairedTeamMembers = new SelectList(teamMembers, "Id", "FullName", model.SelectedPairedTeamMemberIds);
+            return View(model);
         }
 
         // GET: Rotas/Delete/5
@@ -146,7 +230,7 @@ namespace ShiftRotaManager.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             await _rotaService.DeleteRotaAsync(id);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Calendar));
         }
 
         // GET: Rotas/AssignOpenShift/5
@@ -220,9 +304,9 @@ namespace ShiftRotaManager.Web.Controllers
                     title += " (Open)";
                 }
 
-                if (r.PairedTeamMember != null)
+                foreach (var p in r.PairedTeamMembers ?? [])
                 {
-                    title += $" w/ {r.PairedTeamMember.FirstName}";
+                    title += $" w/ {p.FirstName} {p.LastName}";
                 }
 
                 // FullCalendar expects 'start' and 'end' in ISO 8601 format
@@ -247,9 +331,9 @@ namespace ShiftRotaManager.Web.Controllers
                 {
                     backgroundColor = "#dc3545"; // Red for leave/illness
                 }
-                else if (r.PairedTeamMemberId.HasValue)
+                else if (r.PairedTeamMembers != null && r.PairedTeamMembers.Count > 0)
                 {
-                    backgroundColor = "#28a745"; // Green for paired/training
+                    backgroundColor = "#28a745"; // Green for paired
                 }
 
 
@@ -267,6 +351,42 @@ namespace ShiftRotaManager.Web.Controllers
             }).ToList();
 
             return Json(events);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRecommendedMembers(DateTime startDate, DateTime endDate)
+        {
+            // Fetch all members once to avoid multiple database calls.
+            var allMembers = await _teamMemberService.GetAllTeamMembersAsync();
+
+            var recommendations = new List<object>();
+            
+            // Loop through each day in the date range.
+            for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+            {
+                // Get the day of the week for the current date (e.g., "Monday").
+                var dayOfWeek = date.DayOfWeek.ToString();
+
+                // Find all members whose preferred days string contains the current day.
+                var recommendedMembers = allMembers
+                    .Where(m => !string.IsNullOrEmpty(m.PreferredDaysOfWeek) && m.PreferredDaysOfWeek.Contains(dayOfWeek))
+                    .Select(m => new {
+                        id = m.Id,
+                        name = $"{m.FirstName} {m.LastName}",
+                        preferredDay = dayOfWeek,
+                        preferredShiftId = m.PreferredShift.Id,
+                        preferredShiftName = m.PreferredShift != null ? m.PreferredShift.Name : "N/A" })
+                    .ToList();
+
+                recommendations.Add(new 
+                {
+                    date = date.ToShortDateString(),
+                    members = recommendedMembers
+                });
+            }
+
+            // Return the list of recommended members per day as a JSON object.
+            return Json(recommendations);
         }
     }
 }

@@ -1,0 +1,144 @@
+@model IEnumerable<ShiftRotaManager.Data.Models.Role>
+
+@{
+    ViewData["Title"] = "Roles";
+}
+
+@functions {
+    string GetRoleBorderClass(string roleName)
+    {
+        return roleName?.ToLower() switch
+        {
+            "manager" => "border-primary",
+            "engineer" => "border-secondary",
+            _ => "border-info"
+        };
+    }
+}
+
+<style>
+    .card-shift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: 0;
+        border-left: 4px solid;
+    }
+
+    .card-shift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-0">Manage Roles</h1>
+        <p class="text-muted mb-0">View, create, and edit Roles.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+        <i class="bi bi-plus-lg me-2"></i>Create New Role
+    </a>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div id="error" class="alert alert-light text-center rounded-3 shadow-sm d-none"  role="alert"></div>
+                <div class="card h-100 shadow-sm card-shift @GetRoleBorderClass(item.Name)">
+                    <div class="card-body d-flex flex-column">                        
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <input type="text" class="form-control form-control-sm editable-name" value="@item.Name" readonly data-id="@item.Id" />
+                        </div>
+
+                        <div class="mt-auto text-center">
+                            <div class="d-inline-flex gap-2">
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 edit-btn" data-id="@item.Id">
+                                    <i class="bi bi-pencil-fill me-1"></i> Edit
+                                </button>
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                        <i class="bi bi-trash-fill me-1"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+  @Html.AntiForgeryToken()
+
+<script>
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const id = this.dataset.id;
+            const input = document.querySelector(`.editable-name[data-id='${id}']`);
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            if (input.readOnly) {
+                // Switch to edit mode
+                input.readOnly = false;
+                input.focus();
+                this.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save';
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-outline-success');
+            } else {
+                // Save changes via AJAX POST
+                const newName = input.value;
+
+                try {
+                    const response = await fetch(`/Roles/Edit/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({
+                            __RequestVerificationToken: token,
+                            Id: id,
+                            Name: newName
+                        })
+                    });
+
+                    if (response.redirected) {
+                        window.location.href = response.url; // Redirect to Index
+                    } else if (response.ok) {
+                        input.readOnly = true;
+                        this.innerHTML = '<i class="bi bi-pencil-fill me-1"></i> Edit';
+                        this.classList.remove('btn-outline-success');
+                        this.classList.add('btn-outline-secondary');
+                    } else {
+                        showError('Failed to update. Please try again.');
+                    }
+                } catch (error) {
+                    showError('An error occurred while updating.');
+                }
+            }
+        });
+    });
+
+
+    function showError(message){
+        var errorElement = document.getElementById('error');
+            errorElement.classList.remove('d-none');
+            errorElement.innerText = 'Failed to update. Please try again.';
+            setTimeout(function () {
+                errorElement.classList.add('d-none');
+            }, 3000);
+    }
+</script>
+}
+else
+{
+    <div class="text-center p-5 bg-light rounded-3">
+        <i class="bi bi-calendar2-x-fill display-4 text-muted"></i>
+        <h3 class="mt-3">No Roles Created Yet</h3>
+        <p class="lead text-muted">Get started by creating the first role.</p>
+        <a asp-action="Create" class="btn btn-lg btn-primary rounded-pill px-4 mt-3">
+            <i class="bi bi-plus-lg me-2"></i>Create the First Role
+        </a>
+    </div>
+}

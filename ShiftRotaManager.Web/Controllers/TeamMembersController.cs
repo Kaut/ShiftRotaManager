@@ -1,20 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShiftRotaManager.Core.Interfaces;
+using ShiftRotaManager.Web.Models;
 using ShiftRotaManager.Data.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ShiftRotaManager.Web.Controllers
 {
     public class TeamMembersController : Controller
     {
         private readonly ITeamMemberService _teamMemberService;
+        private readonly IShiftService _shiftService;
 
-        public TeamMembersController(ITeamMemberService teamMemberService)
+
+        public TeamMembersController(ITeamMemberService teamMemberService, IShiftService shiftService)
         {
             _teamMemberService = teamMemberService;
+            _shiftService = shiftService;
         }
 
         // GET: TeamMembers
@@ -28,19 +29,29 @@ namespace ShiftRotaManager.Web.Controllers
         public async Task<IActionResult> Create()
         {
             ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name");
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name");
             return View();
         }
 
         // POST: TeamMembers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email")] TeamMember teamMember, Guid RoleId)
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,RoleId,ShiftId,PreferredDaysOfWeek")] TeamMemberViewModel teamMember)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _teamMemberService.AddTeamMemberAsync(teamMember, RoleId);
+                    var member = new TeamMember
+                    {
+                        FirstName = teamMember.FirstName,
+                        LastName = teamMember.LastName,
+                        Email = teamMember.Email,
+                        RoleId = teamMember.RoleId,
+                        ShiftId = teamMember.ShiftId,
+                        PreferredDaysOfWeek = string.Join(",", teamMember.PreferredDaysOfWeek)
+                    };
+                    await _teamMemberService.AddTeamMemberAsync(member);
                     return RedirectToAction(nameof(Index));
                 }
                 catch (ArgumentException ex)
@@ -52,7 +63,8 @@ namespace ShiftRotaManager.Web.Controllers
                     ModelState.AddModelError(string.Empty, "An error occurred while adding the team member.");
                 }
             }
-            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", RoleId);
+            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", teamMember.ShiftId);
             return View(teamMember);
         }
 
@@ -69,14 +81,26 @@ namespace ShiftRotaManager.Web.Controllers
             {
                 return NotFound();
             }
+            var viewModel = new TeamMemberViewModel
+            {
+                Id = teamMember.Id,
+                Email = teamMember.Email,
+                FirstName = teamMember.FirstName,
+                LastName = teamMember.LastName,
+                RoleId = teamMember.RoleId,
+                ShiftId = teamMember.ShiftId,
+                PreferredDaysOfWeek = teamMember.PreferredDaysOfWeek.Split(",")
+            };
             // Note: Updating roles would require more complex logic here, e.g., fetching current user roles
-            return View(teamMember);
+            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", teamMember.ShiftId);
+            return View(viewModel);
         }
 
         // POST: TeamMembers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FirstName,LastName,Email")] TeamMember teamMember)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FirstName,LastName,Email,RoleId, ShiftId, PreferredDaysOfWeek")] TeamMemberViewModel teamMember)
         {
             if (id != teamMember.Id)
             {
@@ -87,14 +111,31 @@ namespace ShiftRotaManager.Web.Controllers
             {
                 try
                 {
-                    await _teamMemberService.UpdateTeamMemberAsync(teamMember);
+                    var member = new TeamMember
+                    {
+                        Id = teamMember.Id,
+                        FirstName = teamMember.FirstName,
+                        LastName = teamMember.LastName,
+                        Email = teamMember.Email,
+                        RoleId = teamMember.RoleId,
+                        ShiftId = teamMember.ShiftId,
+                        PreferredDaysOfWeek = string.Join(",", teamMember.PreferredDaysOfWeek)
+                    };
+                    await _teamMemberService.UpdateTeamMemberAsync(member);
                     return RedirectToAction(nameof(Index));
                 }
-                catch (Exception)
+                catch (ArgumentException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (Exception e)
                 {
                     ModelState.AddModelError(string.Empty, "An error occurred while updating the team member.");
                 }
             }
+            // Repopulate the roles for the dropdown if we return to the view
+            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
+            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", teamMember.ShiftId);
             return View(teamMember);
         }
 
@@ -120,6 +161,12 @@ namespace ShiftRotaManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
+           
+            var teamMember = await _teamMemberService.GetTeamMemberByIdAsync(id);
+            if (teamMember == null)
+            {
+                return NotFound();
+            }
             await _teamMemberService.DeleteTeamMemberAsync(id);
             return RedirectToAction(nameof(Index));
         }

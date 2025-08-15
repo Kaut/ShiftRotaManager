@@ -1,31 +1,109 @@
+/* Custom Theme Variables */
+:root {
+    --bs-primary: #4f46e5; /* A vibrant indigo */
+    --bs-primary-rgb: 79, 70, 229;
+    --bs-link-color-rgb: 79, 70, 229;
+    --bs-link-hover-color-rgb: 67, 56, 202; /* Darker indigo for hover */
+}
+
+/* Make buttons more vibrant and interactive */
+.btn-primary {
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-bg: #4338ca; /* Darker indigo */
+    --bs-btn-hover-border-color: #3730a3;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--bs-box-shadow-sm);
+}
+
+/* General Body and HTML styling */
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7f6; /* A soft, off-white background */
+    color: #333;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Make the main content area take up available space, pushing the footer down */
+main {
+    flex: 1;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Main content container styling */
+.main-content-container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.07);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Enhanced card styling for forms and content */
+.card {
+    border: 0;
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+}
+
+/* Navbar improvements */
+.navbar-brand {
+    font-weight: 600;
+}
+
+/* Table styling */
+.table {
+    border-radius: 0.5rem;
+    overflow: hidden; /* Ensures rounded corners are applied to the table */
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.9rem 0.9rem;
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #e9ecef;
+    border-bottom-width: 1px;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* A more subtle hover for tables for a modern feel */
+.table-hover > tbody > tr:hover > * {
+    --bs-table-accent-bg: var(--bs-tertiary-bg);
+}
+
+/* Style for icon-only buttons in tables for better alignment and spacing */
+.table .btn {
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }

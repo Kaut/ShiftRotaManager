@@ -2,73 +2,254 @@
     ViewData["Title"] = "Rota Calendar";
 }
 
-<h1 class="text-center mb-4">Rota Calendar</h1>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold mb-0 text-primary">Rota Calendar</h1>
+        <a asp-action="Create" asp-controller="Rotas" class="btn btn-primary d-flex align-items-center">
+            <i class="fas fa-plus-circle me-2"></i>New Rota
+        </a>
+    </div>
 
-<div id='calendar' class="shadow-sm rounded-3 p-3 bg-white"></div>
+    <div class="card shadow-lg border-0">
+        <div class="card-body">
+            <div id="calendar-container" style="position: relative;">
+                <div id="calendar-loading" class="text-center" style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading Calendar...</p>
+                </div>
+                <div id='calendar'></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
-    <!-- FullCalendar JS -->
+  <!-- FullCalendar JS and CSS from CDN -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales-all.global.min.js'></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
 
+    <style>
+        /* FullCalendar overrides for a modern, flat design */
+        #calendar {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Remove the default FullCalendar border on the grid */
+        .fc .fc-scrollgrid-sync-table {
+            border-collapse: collapse;
+        }
+
+        .fc .fc-scrollgrid-sync-table th,
+        .fc .fc-scrollgrid-sync-table td {
+            border: none;
+        }
+
+        /* Tweak the day headers */
+        .fc .fc-col-header-cell-cushion {
+            text-transform: uppercase;
+            font-size: 0.8em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #6c757d; /* Bootstrap muted color */
+            padding: 10px 0;
+        }
+
+        /* Style for the day cells */
+        .fc .fc-daygrid-day-number {
+            font-weight: 700;
+            font-size: 1.2em;
+            padding: 10px;
+            display: inline-block; /* to apply padding correctly */
+        }
+
+        /* Event styling for a cleaner look */
+        .fc-event {
+            border: none !important;
+            cursor: pointer;
+            font-size: 0.85em;
+            padding: 5px 8px; /* Slightly more padding */
+            border-radius: 4px; /* Subtle rounded corners */
+            margin-bottom: 2px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis; /* Truncate long titles with an ellipsis */
+        }
+        
+        .fc-daygrid-event-dot {
+            display: none; /* Hide the default FullCalendar dot for a cleaner look */
+        }
+
+        /* Custom styles for event status (now with more subtle colors) */
+        .fc-event-status-open {
+            border-left: 4px solid #ffc107 !important; /* Warning */
+            background-color: #fff8e1 !important;
+            color: #5d562f !important;
+        }
+        
+        .fc-event-status-covered {
+            border-left: 4px solid #198754 !important; /* Success */
+            background-color: #d1e7dd !important;
+            color: #0c4128 !important;
+        }
+
+        /* Custom styles for different covered shifts */
+        .fc-event-shift-morning {
+            border-left-color: #0dcaf0 !important;
+        }
+
+        .fc-event-shift-evening {
+            border-left-color: #fd7e14 !important;
+        }
+
+        .fc-event-shift-night {
+            border-left-color: #6f42c1 !important;
+        }
+
+        /* Style for days with no rota events (subtle, less distracting) */
+        .fc-day-no-events {
+            background-color: #f8f9fa;
+        }
+
+        /* Hover effect for events to improve interactivity */
+        .fc-event:hover {
+            background-color: #e9ecef !important; /* Light gray hover state */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth', // Default view
+            const calendarEl = document.getElementById('calendar');
+            const loadingEl = document.getElementById('calendar-loading');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay' // Views available
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                locale: 'en-gb', // Or your preferred locale
-                editable: false, // Set to true if you want drag-and-drop editing
+                locale: 'en-gb',
+                editable: false,
                 selectable: true,
+                dayMaxEvents: true,
+
+                loading: function(isLoading) {
+                    loadingEl.style.display = isLoading ? 'flex' : 'none';
+                },
+
+                dateClick: function(info) {
+                    const createUrl = new URL('@Url.Action("Create", "Rotas")', window.location.origin);
+                    createUrl.searchParams.append('date', info.dateStr);
+                    window.location.href = createUrl.href;
+                },
+
+                eventsSet: function(info) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    document.querySelectorAll('.fc-daygrid-day').forEach(function(dayEl) {
+                        const dateStr = dayEl.getAttribute('data-date');
+                        if (!dateStr) return;
+
+                        const date = new Date(dateStr + 'T00:00:00');
+
+                        if (date < today) {
+                            dayEl.classList.remove('fc-day-no-events');
+                            return;
+                        }
+                        
+                        const dayHasEvents = Array.isArray(info.events) && info.events.some(event => {
+                            const eventStart = event.start;
+                            if (!eventStart) return false;
+                            return eventStart.toISOString().split('T')[0] === dateStr;
+                        });
+
+                        if (!dayHasEvents) {
+                            dayEl.classList.add('fc-day-no-events');
+                        } else {
+                            dayEl.classList.remove('fc-day-no-events');
+                        }
+                    });
+                },
+
                 eventClick: function(info) {
-                    // Redirect to the event's URL (Rota Edit page)
+                    info.jsEvent.preventDefault();
                     if (info.event.url) {
                         window.location.href = info.event.url;
-                        info.jsEvent.preventDefault(); // Prevent default browser action
                     }
                 },
-                // Fetch events from your API endpoint
+
                 events: {
                     url: '@Url.Action("GetCalendarRotas", "Rotas")',
-                    method: 'GET',
-                    extraParams: function() {
-                        // You can add extra parameters here if needed, e.g., filters
-                        return {};
-                    },
                     failure: function(failureInfo) {
-                        console.error('There was an error while fetching rotas:', failureInfo.error);
-                        alert('There was an error fetching the rota data. Please check the console for details.');
+                        console.error('Error fetching rotas:', failureInfo.error);
+                        calendarEl.innerHTML = `<div class="alert alert-danger" role="alert">
+                                                    <strong>Error:</strong> Could not load rota data. Please try refreshing the page.
+                                                </div>`;
                     }
                 },
-                // Customize event rendering for better display
+
+                eventClassNames: function(arg) {
+                    const status = arg.event.extendedProps.status?.toLowerCase();
+                    const shiftName = arg.event.extendedProps.shiftName?.toLowerCase();
+                    
+                    if (!status) return [];
+
+                    let classNames = [`fc-event-status-${status}`];
+
+                    if (status === 'covered' && shiftName) {
+                        if (shiftName.includes('morning')) {
+                            classNames.push('fc-event-shift-morning');
+                        } else if (shiftName.includes('evening')) {
+                            classNames.push('fc-event-shift-evening');
+                        } else if (shiftName.includes('night')) {
+                            classNames.push('fc-event-shift-night');
+                        }
+                    }
+                    return classNames;
+                },
+
                 eventContent: function(arg) {
-                    let title = arg.event.title;
-                    let timeText = arg.timeText ? `<div class="fc-event-time">${arg.timeText}</div>` : '';
+                    let containerEl = document.createElement('div');
+                    containerEl.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'w-100');
+                    
+                    // Create the main content element (for editing)
+                    let contentEl = document.createElement('div');
+                    contentEl.classList.add('fc-event-title', 'fc-event-main');
+                    contentEl.style.flexGrow = '1';
+                    contentEl.innerHTML = arg.event.title;
 
-                    let eventEl = document.createElement('div');
-                    eventEl.innerHTML = `${timeText}<div class="fc-event-title">${title}</div>`;
+                    // Create the delete button element
+                    let deleteBtn = document.createElement('span');
+                    deleteBtn.classList.add('delete-icon', 'ms-2');
+                    deleteBtn.innerHTML = '<i class="fas fa-trash-alt" style="color: #dc3545;"></i>';
+                    deleteBtn.style.cursor = 'pointer';
 
-                    // You can add more complex styling or icons here based on arg.event.extendedProps
-                    // For example, if you passed 'status' in extendedProps:
-                    if (arg.event.extendedProps.status === 'Open') {
-                        eventEl.style.borderLeft = '5px solid orange';
-                    }
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        e.preventDefault();
 
-                    return { domNodes: [eventEl] };
-                },
-                // Optional: Customize event colors based on status (already handled in C# for simplicity)
-                // eventDidMount: function(info) {
-                //     if (info.event.extendedProps.status === 'Open') {
-                //         info.el.style.backgroundColor = 'orange';
-                //         info.el.style.borderColor = 'darkorange';
-                //     }
-                // }
+                        const rotaId = arg.event.id;
+                        if (rotaId) {
+                            if (confirm('Are you sure you want to delete this rota?')) {
+                                const deleteUrl = new URL('@Url.Action("Delete", "Rotas")', window.location.origin);
+                                deleteUrl.searchParams.append('id', rotaId);
+                                window.location.href = deleteUrl.href;
+                            }
+                        }
+                    });
+
+                    containerEl.appendChild(contentEl);
+                    containerEl.appendChild(deleteBtn);
+
+                    return { domNodes: [containerEl] };
+                }
             });
 
             calendar.render();

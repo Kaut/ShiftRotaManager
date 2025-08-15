@@ -1,0 +1,206 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+@section Styles {
+    <!-- FullCalendar CSS - Loaded locally -->
+    <link href='~/lib/fullcalendar/main.min.css' rel='stylesheet' />
+    <style>
+        .card-link {
+            transition: transform 0.2s ease-in-out;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #dashboard-calendar .fc-header-toolbar {
+            margin-bottom: 0.5em;
+        }
+
+        #dashboard-calendar .fc-toolbar-title {
+            font-size: 1rem;
+        }
+
+        #dashboard-calendar .fc-button-group {
+            display: none;
+        }
+
+        .fc-day-other .fc-daygrid-day-number {
+            color: #ccc;
+        }
+
+        #dashboard-calendar {
+            max-width: 100%;
+        }
+    </style>
+}
+
+<h1 class="my-4">Dashboard</h1>
+
+<div class="row g-4">
+    <!-- Total Team Members -->
+    <div class="col-lg-4 col-md-6">
+        <a asp-controller="TeamMembers" asp-action="Index" class="card-link">
+            <div class="card p-3 shadow-sm border-0 rounded-3 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-primary text-white rounded-circle me-3">
+                        <i class="fas fa-users p-3 fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 text-muted">Total Team Members</h5>
+                        <h2 class="mb-0 fw-bold">@ViewBag.TeamMemberCount</h2>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Total Shifts -->
+    <div class="col-lg-4 col-md-6">
+        <a asp-controller="Shifts" asp-action="Index" class="card-link">
+            <div class="card p-3 shadow-sm border-0 rounded-3 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-success text-white rounded-circle me-3">
+                        <i class="fas fa-clock p-3 fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 text-muted">Total Shifts</h5>
+                        <h2 class="mb-0 fw-bold">@ViewBag.ShiftCount</h2>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Total Roles -->
+    @* <div class="col-lg-3 col-md-6">
+        <a asp-controller="Roles" asp-action="Index" class="card-link">
+            <div class="card p-3 shadow-sm border-0 rounded-3 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-info text-white rounded-circle me-3">
+                        <i class="fas fa-briefcase p-3 fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 text-muted">Total Roles</h5>
+                        <h2 class="mb-0 fw-bold">@ViewBag.RoleCount</h2>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div> *@
+
+    <!-- Open Shifts -->
+    <div class="col-lg-4 col-md-6">
+        <a asp-controller="Rotas" asp-action="Calendar" class="card-link">
+            <div class="card p-3 shadow-sm border-0 rounded-3 h-100">
+                <div class="d-flex align-items-center">
+                    <div class="icon-shape bg-warning text-white rounded-circle me-3">
+                        <i class="fas fa-exclamation-triangle p-3 fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 text-muted">Open Shifts</h5>
+                        <h2 class="mb-0 fw-bold">@ViewBag.OpenShiftCount</h2>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
+    <!-- Upcoming Events Calendar -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+            <div class="card-body">
+                <h5 class="card-title">Rota Overview</h5>
+                <div id='dashboard-calendar'></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="list-group list-group-flush mt-3">
+                    <a asp-controller="Rotas" asp-action="Create" class="list-group-item list-group-item-action border-0 rounded-3 mb-2 bg-light">
+                        <i class="fas fa-plus-circle me-2 text-primary"></i> Create New Rota
+                    </a>
+                    <a asp-controller="TeamMembers" asp-action="Create" class="list-group-item list-group-item-action border-0 rounded-3 mb-2 bg-light">
+                        <i class="fas fa-user-plus me-2 text-success"></i> Add Team Member
+                    </a>
+                    <a asp-controller="Shifts" asp-action="Create" class="list-group-item list-group-item-action border-0 rounded-3 mb-2 bg-light">
+                        <i class="fas fa-business-time me-2 text-info"></i> Define New Shift
+                    </a>
+                    <a asp-controller="Rotas" asp-action="Calendar" class="list-group-item list-group-item-action border-0 rounded-3 mb-2 bg-light">
+                        <i class="fas fa-search me-2 text-warning"></i> View Full Calendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- FullCalendar JS Imports -->
+    <script src='~/lib/fullcalendar/core/index.global.min.js'></script>
+    <script src='~/lib/fullcalendar/daygrid/index.global.min.js'></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            var calendarEl = document.getElementById('dashboard-calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                plugins: ['dayGrid'],
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: '' // No right-side buttons for a mini-calendar
+                },
+                locale: 'en-gb',
+                dayMaxEvents: true, // Allow multiple events on a day
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    const params = new URLSearchParams({
+                        start: fetchInfo.startStr,
+                        end: fetchInfo.endStr
+                    });
+
+                    fetch(`/Rotas/GetCalendarRotas?${params.toString()}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Map fetched rotas to be compatible with DayGrid view
+                            const dashboardEvents = data.map(event => ({
+                                id: event.id,
+                                title: event.title,
+                                start: event.start,
+                                end: event.end,
+                                color: event.status === 'Open' ? '#ffc107' : '#0d6efd' // Color-code open shifts
+                            }));
+                            successCallback(dashboardEvents);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching rotas for dashboard:', error);
+                            failureCallback(error);
+                        });
+                },
+                eventClick: function(info) {
+                    // Clicking on an event on the dashboard navigates to the full calendar
+                    window.location.href = '@Url.Action("Calendar", "Rotas")';
+                }
+            });
+
+            calendar.render();
+        });
+    </script>
+}
