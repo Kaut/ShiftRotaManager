@@ -1,39 +1,107 @@
-@model ShiftRotaManager.Data.Models.TeamMember
+@model ShiftRotaManager.Web.Models.TeamMemberViewModel
 
 @{
     ViewData["Title"] = "Add Team Member";
+    var roles = ViewBag.Roles as SelectList;
+    var shifts = ViewBag.Shifts as SelectList;
+    var daysOfWeek = new List<string> {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 }
 
-<h1 class="text-center mb-4">Add New Team Member</h1>
-
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <div class="mb-3">
-                <label asp-for="FirstName" class="form-label"></label>
-                <input asp-for="FirstName" class="form-control rounded" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+    <div class="col-lg-6 col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mb-0">Add New Team Member</h1>
+            <a asp-action="Index" class="btn btn-light rounded-circle" data-bs-toggle="tooltip" title="Back to List">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="FirstName" class="form-control" placeholder="John" />
+                        <label asp-for="FirstName"></label>
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="LastName" class="form-control" placeholder="Doe" />
+                        <label asp-for="LastName"></label>
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                        <label asp-for="Email"></label>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="RoleId" class="form-select" asp-items="roles">
+                            <option value="" selected>-- Select Role --</option>
+                        </select>
+                        <label asp-for="RoleId">Role</label>
+                        <span asp-validation-for="RoleId" class="text-danger small"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select asp-for="ShiftId" asp-items="shifts" class="form-select">
+                            <option value="">-- Select Shift --</option>
+                        </select>
+                        <label asp-for="ShiftId">Shift</label>
+                        <span asp-validation-for="ShiftId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="preferred-days-group" class="mb-2">Preferred Working Days</label>
+                        <div id="preferred-days-group">
+                            @foreach (var day in daysOfWeek)
+                            {
+                                <div class="form-check form-check-inline">
+                                    <input type="checkbox" class="form-check-input preferred-day-checkbox" name="PreferredDaysOfWeek" value="@day" id="day-@day" />
+                                    <label class="form-check-label" for="day-@day">@day</label>
+                                </div>
+                            }
+                        </div>
+                        <span asp-validation-for="PreferredDaysOfWeek" class="text-danger small" id="preferred-days-validation"></span>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const checkboxes = document.querySelectorAll('.preferred-day-checkbox');
+                            const validationSpan = document.getElementById('preferred-days-validation');
+                            const form = checkboxes.length ? checkboxes[0].closest('form') : null;
+                            console.log('checkboxes - ' + checkboxes);
+                            function validatePreferredDays() {
+                                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                                console.log('CheckedCount - ' + checkedCount);
+                                if (checkedCount < 5) {
+                                    validationSpan.textContent = "Please select at least 5 preferred working days.";
+                                    return false;
+                                } else {
+                                    validationSpan.textContent = "";
+                                    return true;
+                                }
+                            }
+
+                            checkboxes.forEach(cb => {
+                                console.log('fore each cb 1 - ' + cb);
+                                cb.addEventListener('change', validatePreferredDays);
+                                console.log('fore each cb 2- ' + cb);
+                            });
+
+                            if (form) {
+                                form.addEventListener('submit', function (e) {
+                                    if (!validatePreferredDays()) {
+                                        e.preventDefault();
+                                    }
+                                });
+                            }
+                        });
+                    </script>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm"><i class="bi bi-person-plus-fill me-2"></i>Create Member</button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label asp-for="LastName" class="form-label"></label>
-                <input asp-for="LastName" class="form-control rounded" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control rounded" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label for="RoleId" class="form-label">Role</label>
-                <select id="RoleId" name="RoleId" class="form-control rounded" asp-items="ViewBag.Roles"></select>
-            </div>
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary rounded-pill">Add Team Member</button>
-                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">Back to List</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
