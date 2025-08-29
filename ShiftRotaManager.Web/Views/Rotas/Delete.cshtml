@@ -34,7 +34,14 @@
                         Paired Team Member
                     </dt>
                     <dd class="col-sm-8">
-                        @(Model.PairedTeamMember?.FirstName + " " + Model.PairedTeamMember?.LastName ?? "N/A")
+                        @if (Model.PairedTeamMembers != null && Model.PairedTeamMembers.Any())
+                            {
+                                @string.Join(", ", Model.PairedTeamMembers.Select(tm => $"{tm.FirstName} {tm.LastName}"))
+                            }
+                            else
+                            {
+                                @:<span class="text-muted fst-italic">N/A</span>
+                            }
                     </dd>
                     <dt class="col-sm-4">
                         @Html.DisplayNameFor(model => model.Status)
@@ -44,7 +51,7 @@
                     </dd>
                 </dl>
 
-                <form asp-action="DeleteConfirmed">
+                <form asp-action="Delete">
                     <input type="hidden" asp-for="Id" />
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-danger rounded-pill">Delete</button>

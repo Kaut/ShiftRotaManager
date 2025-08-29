@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShiftRotaManager.Data.Data;
 
@@ -16,29 +15,40 @@ namespace ShiftRotaManager.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.Entity("RotaPairedTeamMember", b =>
+                {
+                    b.Property<Guid>("RotaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TeamMemberId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RotaId", "TeamMemberId");
+
+                    b.HasIndex("TeamMemberId");
+
+                    b.ToTable("RotaPairedTeamMember");
+                });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.AnnualLeave", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("TeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -51,19 +61,19 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("RequiredStaffCount")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -74,20 +84,20 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -100,20 +110,20 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("Hours")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<Guid>("TeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -126,136 +136,64 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            Name = "Admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000002"),
-                            Name = "User"
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000003"),
-                            Name = "Reader"
-                        });
                 });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.Rota", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("PairedTeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("ShiftId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("TeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PairedTeamMemberId");
 
                     b.HasIndex("ShiftId");
 
                     b.HasIndex("TeamMemberId");
 
                     b.ToTable("Rotas");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("e0000000-0000-0000-0000-000000000001"),
-                            Date = new DateTime(2025, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ShiftId = new Guid("b0000000-0000-0000-0000-000000000001"),
-                            Status = 0,
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("e0000000-0000-0000-0000-000000000002"),
-                            Date = new DateTime(2025, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ShiftId = new Guid("b0000000-0000-0000-0000-000000000001"),
-                            Status = 0,
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("e0000000-0000-0000-0000-000000000003"),
-                            Date = new DateTime(2025, 8, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ShiftId = new Guid("b0000000-0000-0000-0000-000000000002"),
-                            Status = 0,
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("e0000000-0000-0000-0000-000000000004"),
-                            Date = new DateTime(2025, 8, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ShiftId = new Guid("b0000000-0000-0000-0000-000000000003"),
-                            Status = 0,
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("e0000000-0000-0000-0000-000000000005"),
-                            Date = new DateTime(2025, 8, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ShiftId = new Guid("b0000000-0000-0000-0000-000000000001"),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("e0000000-0000-0000-0000-000000000006"),
-                            Date = new DateTime(2025, 8, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            PairedTeamMemberId = new Guid("d0000000-0000-0000-0000-000000000004"),
-                            ShiftId = new Guid("b0000000-0000-0000-0000-000000000002"),
-                            Status = 0,
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000001")
-                        });
                 });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.Rule", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Parameters")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -266,88 +204,53 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<TimeSpan>("Duration")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.Property<TimeSpan>("EndTime")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsNightShift")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxStaffAllowed")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("MinStaffRequired")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("Shifts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("b0000000-0000-0000-0000-000000000001"),
-                            Duration = new TimeSpan(0, 8, 0, 0, 0),
-                            EndTime = new TimeSpan(0, 14, 0, 0, 0),
-                            IsNightShift = false,
-                            MaxStaffAllowed = 5,
-                            MinStaffRequired = 2,
-                            Name = "Morning Shift",
-                            StartTime = new TimeSpan(0, 6, 0, 0, 0)
-                        },
-                        new
-                        {
-                            Id = new Guid("b0000000-0000-0000-0000-000000000002"),
-                            Duration = new TimeSpan(0, 8, 0, 0, 0),
-                            EndTime = new TimeSpan(0, 22, 0, 0, 0),
-                            IsNightShift = false,
-                            MaxStaffAllowed = 5,
-                            MinStaffRequired = 2,
-                            Name = "Afternoon Shift",
-                            StartTime = new TimeSpan(0, 14, 0, 0, 0)
-                        },
-                        new
-                        {
-                            Id = new Guid("b0000000-0000-0000-0000-000000000003"),
-                            Duration = new TimeSpan(0, 8, 0, 0, 0),
-                            EndTime = new TimeSpan(0, 6, 0, 0, 0),
-                            IsNightShift = true,
-                            MaxStaffAllowed = 3,
-                            MinStaffRequired = 1,
-                            Name = "Night Shift",
-                            StartTime = new TimeSpan(0, 22, 0, 0, 0)
-                        });
                 });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.ShiftVariant", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("BaseShiftId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<TimeSpan>("EndTimeOffset")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<TimeSpan>("StartTimeOffset")
-                        .HasColumnType("time");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -360,72 +263,56 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PreferredDaysOfWeek")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ShiftId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TeamMembers");
+                    b.HasIndex("RoleId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("d0000000-0000-0000-0000-000000000001"),
-                            Email = "alice.smith@example.com",
-                            FirstName = "Alice",
-                            LastName = "Smith"
-                        },
-                        new
-                        {
-                            Id = new Guid("d0000000-0000-0000-0000-000000000002"),
-                            Email = "bob.j@example.com",
-                            FirstName = "Bob",
-                            LastName = "Johnson"
-                        },
-                        new
-                        {
-                            Id = new Guid("d0000000-0000-0000-0000-000000000003"),
-                            Email = "charlie.b@example.com",
-                            FirstName = "Charlie",
-                            LastName = "Brown"
-                        },
-                        new
-                        {
-                            Id = new Guid("d0000000-0000-0000-0000-000000000004"),
-                            Email = "david.l@example.com",
-                            FirstName = "David",
-                            LastName = "Lee"
-                        });
+                    b.HasIndex("ShiftId");
+
+                    b.ToTable("TeamMembers");
                 });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.TimeOffInLieu", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("HoursAccrued")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<double>("HoursUsed")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<Guid>("TeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -438,13 +325,13 @@ namespace ShiftRotaManager.Data.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("TeamMemberId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -453,32 +340,21 @@ namespace ShiftRotaManager.Data.Migrations
                     b.HasIndex("TeamMemberId");
 
                     b.ToTable("UserRoles");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("f0000000-0000-0000-0000-000000000001"),
-                            RoleId = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("f0000000-0000-0000-0000-000000000002"),
-                            RoleId = new Guid("a0000000-0000-0000-0000-000000000002"),
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("f0000000-0000-0000-0000-000000000003"),
-                            RoleId = new Guid("a0000000-0000-0000-0000-000000000002"),
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("f0000000-0000-0000-0000-000000000004"),
-                            RoleId = new Guid("a0000000-0000-0000-0000-000000000002"),
-                            TeamMemberId = new Guid("d0000000-0000-0000-0000-000000000004")
-                        });
+            modelBuilder.Entity("RotaPairedTeamMember", b =>
+                {
+                    b.HasOne("ShiftRotaManager.Data.Models.Rota", null)
+                        .WithMany()
+                        .HasForeignKey("RotaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShiftRotaManager.Data.Models.TeamMember", null)
+                        .WithMany()
+                        .HasForeignKey("TeamMemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.AnnualLeave", b =>
@@ -516,11 +392,6 @@ namespace ShiftRotaManager.Data.Migrations
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.Rota", b =>
                 {
-                    b.HasOne("ShiftRotaManager.Data.Models.TeamMember", "PairedTeamMember")
-                        .WithMany()
-                        .HasForeignKey("PairedTeamMemberId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("ShiftRotaManager.Data.Models.Shift", "Shift")
                         .WithMany("Rotas")
                         .HasForeignKey("ShiftId")
@@ -530,8 +401,6 @@ namespace ShiftRotaManager.Data.Migrations
                     b.HasOne("ShiftRotaManager.Data.Models.TeamMember", "TeamMember")
                         .WithMany("Rotas")
                         .HasForeignKey("TeamMemberId");
-
-                    b.Navigation("PairedTeamMember");
 
                     b.Navigation("Shift");
 
@@ -547,6 +416,25 @@ namespace ShiftRotaManager.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("BaseShift");
+                });
+
+            modelBuilder.Entity("ShiftRotaManager.Data.Models.TeamMember", b =>
+                {
+                    b.HasOne("ShiftRotaManager.Data.Models.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ShiftRotaManager.Data.Models.Shift", "PreferredShift")
+                        .WithMany()
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PreferredShift");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.TimeOffInLieu", b =>

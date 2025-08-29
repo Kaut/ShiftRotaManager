@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ShiftRotaManager.Data.Models
 {
     public class Rota
@@ -12,10 +15,11 @@ namespace ShiftRotaManager.Data.Models
 
         public Guid? TeamMemberId { get; set; } // Nullable for open shifts
         public TeamMember? TeamMember { get; set; } // Navigation property
+        public ICollection<TeamMember> PairedTeamMembers { get; set; } = new List<TeamMember>();
 
-        // For pairing new starters
-        public Guid? PairedTeamMemberId { get; set; }
-        public TeamMember? PairedTeamMember { get; set; } // Navigation property
+        [NotMapped]
+        [Display(Name = "Paired Team Members")]
+        public List<Guid> SelectedPairedTeamMemberIds { get; set; } = new List<Guid>();
     }
 
     public enum RotaStatus
