@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj": {}
+    "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj": {}
   },
   "projects": {
-    "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj": {
+    "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj",
+        "projectUniqueName": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj",
         "projectName": "ShiftRotaManager.Data",
-        "projectPath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj",
+        "projectPath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager\\ShiftRotaManager.Data\\ShiftRotaManager.Data.csproj",
         "packagesPath": "C:\\Users\\v-kaushukla\\.nuget\\packages\\",
-        "outputPath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager.Data\\obj\\",
+        "outputPath": "C:\\Kautilya\\personal\\Samples\\POCs\\ShiftRotaManager\\ShiftRotaManager\\ShiftRotaManager.Data\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -56,9 +56,9 @@
               "target": "Package",
               "version": "[9.0.0, )"
             },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
+            "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.8, )"
             }
           },
           "imports": [
@@ -77,7 +77,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
