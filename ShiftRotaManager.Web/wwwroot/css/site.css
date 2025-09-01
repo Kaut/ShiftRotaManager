@@ -70,6 +70,50 @@ main {
     font-weight: 600;
 }
 
+.card-shift {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 0;
+    border-left: 4px solid;
+}
+
+.card-shift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+/*Dashboard styles*/
+.card-link {
+    transition: transform 0.2s ease-in-out;
+    text-decoration: none;
+    color: inherit;
+}
+
+.card-link:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#dashboard-calendar .fc-header-toolbar {
+    margin-bottom: 0.5em;
+}
+
+#dashboard-calendar .fc-toolbar-title {
+    font-size: 1rem;
+}
+
+#dashboard-calendar .fc-button-group {
+    display: none;
+}
+
+.fc-day-other .fc-daygrid-day-number {
+    color: #ccc;
+}
+
+#dashboard-calendar {
+    max-width: 100%;
+}
+/*Dashboard styles ends*/
+
 /* Navbar improvements */
 .navbar-brand {
     font-weight: 600;

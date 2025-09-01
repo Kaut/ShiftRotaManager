@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShiftRotaManager.Core.Interfaces;
 using ShiftRotaManager.Data.Models;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ShiftRotaManager.Web.Controllers
 {
+    [Authorize]
     public class ShiftsController : Controller
     {
         private readonly IShiftService _shiftService;
