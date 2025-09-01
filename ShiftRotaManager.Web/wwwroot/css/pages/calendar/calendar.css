@@ -1,0 +1,97 @@
+/* FullCalendar overrides for a modern, flat design */
+#calendar {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Remove the default FullCalendar border on the grid */
+.fc .fc-scrollgrid-sync-table {
+    border-collapse: collapse;
+}
+
+.fc .fc-scrollgrid-sync-table th,
+.fc .fc-scrollgrid-sync-table td {
+    border: none;
+}
+
+/* Tweak the day headers */
+.fc .fc-col-header-cell-cushion {
+    text-transform: uppercase;
+    font-size: 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    /* Bootstrap muted color */
+    padding: 10px 0;
+}
+
+/* Style for the day cells */
+.fc .fc-daygrid-day-number {
+    font-weight: 700;
+    font-size: 1.2em;
+    padding: 10px;
+    display: inline-block;
+    /* to apply padding correctly */
+}
+
+/* Event styling for a cleaner look */
+.fc-event {
+    border: none !important;
+    cursor: pointer;
+    font-size: 0.85em;
+    padding: 5px 8px;
+    /* Slightly more padding */
+    border-radius: 4px;
+    /* Subtle rounded corners */
+    margin-bottom: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    /* Truncate long titles with an ellipsis */
+}
+
+.fc-daygrid-event-dot {
+    display: none;
+    /* Hide the default FullCalendar dot for a cleaner look */
+}
+
+/* Custom styles for event status (now with more subtle colors) */
+.fc-event-status-open {
+    border-left: 4px solid #ffc107 !important;
+    /* Warning */
+    background-color: #fff8e1 !important;
+    color: #5d562f !important;
+}
+
+.fc-event-status-covered {
+    border-left: 4px solid #198754 !important;
+    /* Success */
+    background-color: #d1e7dd !important;
+    color: #0c4128 !important;
+}
+
+/* Custom styles for different covered shifts */
+.fc-event-shift-morning {
+    border-left-color: #0dcaf0 !important;
+}
+
+.fc-event-shift-evening {
+    border-left-color: #fd7e14 !important;
+}
+
+.fc-event-shift-night {
+    border-left-color: #6f42c1 !important;
+}
+
+/* Style for days with no rota events (subtle, less distracting) */
+.fc-day-no-events {
+    background-color: #f8f9fa;
+}
+
+/* Hover effect for events to improve interactivity */
+.fc-event:hover {
+    background-color: #e9ecef !important;
+    /* Light gray hover state */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+}

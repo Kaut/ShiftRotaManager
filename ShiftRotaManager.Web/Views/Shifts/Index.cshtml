@@ -1,3 +1,4 @@
+@using Microsoft.CodeAnalysis.Scripting
 @model IEnumerable<ShiftRotaManager.Data.Models.Shift>
 
 @{
@@ -18,18 +19,6 @@
     }
 }
 
-<style>
-    .card-shift {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        border: 0;
-        border-left: 4px solid;
-    }
-
-    .card-shift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-    }
-</style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -103,3 +92,4 @@ else
         </a>
     </div>
 }
+
