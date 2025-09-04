@@ -6,6 +6,7 @@ namespace ShiftRotaManager.Data.Repositories
     {
         Task<IEnumerable<TeamMember>> GetTeamMembersWithRolesAsync();
         Task<TeamMember?> GetTeamMemberByIdWithDetailsAsync(Guid id);
-        Task<ICollection<TeamMember>> GetTeamMembersByPreferredDaysAsync(string days);
+        Task<ICollection<TeamMember>> GetTeamMembersByPreferredDayAsync(DayOfWeek day);
+        void RemovePreference(TeamMemberPreference preference);
     }
 }

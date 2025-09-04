@@ -37,7 +37,7 @@ namespace ShiftRotaManager.Data.Repositories
 
         public async Task<T?> GetByIdAsync(Guid id)
         {
-            return await _dbSet.FindAsync(id);
+            return await _dbSet.FindAsync(id) ;
         }
 
         public void Remove(T entity)

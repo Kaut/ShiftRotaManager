@@ -8,7 +8,6 @@ namespace ShiftRotaManager.Data.Models
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string PreferredDaysOfWeek { get; set; }
         
 
         [NotMapped]
@@ -16,14 +15,10 @@ namespace ShiftRotaManager.Data.Models
 
         // Foreign key for Role
         public Guid RoleId { get; set; }
-        public Guid ShiftId { get; set; }
 
         // Navigation property for roles
         [ForeignKey("RoleId")]
         public Role? Role { get; set; } // Navigation property
-
-        [ForeignKey("ShiftId")]
-        public Shift? PreferredShift { get; set; }
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         // Navigation property for rotas
         public ICollection<Rota> Rotas { get; set; } = new List<Rota>();
@@ -32,5 +27,8 @@ namespace ShiftRotaManager.Data.Models
         public ICollection<TimeOffInLieu> TimeOffInLieu { get; set; } = new List<TimeOffInLieu>();
         public ICollection<Overtime> OvertimeRecords { get; set; } = new List<Overtime>();
         public ICollection<Illness> IllnessRecords { get; set; } = new List<Illness>();
+
+        // Navigation property for member's day/shift preferences
+        public ICollection<TeamMemberPreference> Preferences { get; set; } = new List<TeamMemberPreference>();
     }
 }
