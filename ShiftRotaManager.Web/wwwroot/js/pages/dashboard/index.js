@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         },
         eventClick: function (info) {
             // Clicking on an event on the dashboard navigates to the full calendar
-            window.location.href = calendarPageUrl;
+            window.location.href = '@Url.Action("Calendar", "Rotas")';
         }
     });
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShiftRotaManager.Data.Data;
 
@@ -10,9 +11,11 @@ using ShiftRotaManager.Data.Data;
 namespace ShiftRotaManager.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250901232208_UpdateTeamMemberPreferences")]
+    partial class UpdateTeamMemberPreferences
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
@@ -289,7 +292,8 @@ namespace ShiftRotaManager.Data.Migrations
 
             modelBuilder.Entity("ShiftRotaManager.Data.Models.TeamMemberPreference", b =>
                 {
-                    b.Property<Guid>("TeamMemberId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DayOfWeek")
@@ -298,12 +302,14 @@ namespace ShiftRotaManager.Data.Migrations
                     b.Property<Guid>("ShiftId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("TeamMemberId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("TeamMemberId", "DayOfWeek", "ShiftId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ShiftId");
+
+                    b.HasIndex("TeamMemberId");
 
                     b.ToTable("TeamMemberPreferences");
                 });

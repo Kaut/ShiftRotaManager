@@ -32,7 +32,7 @@ builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
 builder.Services.AddScoped<IRotaRepository, RotaRepository>(); // Register new Rota Repository
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-
+builder.Services.AddScoped<ITeamMemberPrefrencesRepository, TeamMemberPrefrencesRepository>();
 
 // Register Services
 builder.Services.AddScoped<IShiftService, ShiftService>();

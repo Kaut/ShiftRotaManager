@@ -46,9 +46,26 @@
                             <span class="fw-bold">@GetInitials(item.FirstName, item.LastName)</span>
                         </div>
                         <h5 class="card-title mb-1">@item.FirstName @item.LastName</h5>
-                        <p class="card-text text-muted">@item.PreferredShift.Name</p>
-                        <p class="card-text text-muted text-capitalize small">@item.PreferredDaysOfWeek</p>
-                        <p class="card-text text-capitalize fw-bold text-muted small mb-4">@item.Role?.Name</p>
+                        <p class="card-text text-capitalize fw-bold text-muted small">@item.Role?.Name</p>
+
+                        <div class="my-3 flex-grow-1">
+                            @{
+                                var groupedPreferences = (Dictionary<Guid, List<string>>)ViewBag.GroupedPreferences;
+                                if (groupedPreferences.TryGetValue(item.Id, out var preferences) && preferences.Any())
+                                    {
+                                        <div class="d-flex flex-wrap justify-content-center">
+                                            @foreach (var preference in preferences)
+                                            {
+                                                <span class="badge bg-light text-dark m-1 p-2">@preference</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="card-text text-muted small fst-italic">No preferences set</p>
+                                    }
+                            }
+                        </div>
 
                         <div class="mt-auto">
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="tooltip" title="Edit">

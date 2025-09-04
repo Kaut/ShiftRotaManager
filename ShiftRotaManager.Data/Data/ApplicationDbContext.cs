@@ -15,6 +15,7 @@ namespace ShiftRotaManager.Data.Data
         public DbSet<Shift> Shifts { get; set; } = null!;
         public DbSet<ShiftVariant> ShiftVariants { get; set; } = null!;
         public DbSet<TeamMember> TeamMembers { get; set; } = null!;
+        public DbSet<TeamMemberPreference> TeamMemberPreferences { get; set; } = null!;
         public DbSet<Rota> Rotas { get; set; } = null!;
         public DbSet<Rule> Rules { get; set; } = null!;
         public DbSet<CoverageHour> CoverageHours { get; set; } = null!;
@@ -56,8 +57,8 @@ namespace ShiftRotaManager.Data.Data
             modelBuilder.Entity<Rota>()
                 .HasMany(r => r.PairedTeamMembers)
                 .WithMany() // No direct collection on TeamMember for PairedTeamMember
-                .UsingEntity<Dictionary<string, object>>("RotaPairedTeamMember", 
-                        j=> j.HasOne<TeamMember>().WithMany().HasForeignKey("TeamMemberId").OnDelete(DeleteBehavior.Restrict),
+                .UsingEntity<Dictionary<string, object>>("RotaPairedTeamMember",
+                        j => j.HasOne<TeamMember>().WithMany().HasForeignKey("TeamMemberId").OnDelete(DeleteBehavior.Restrict),
                         j => j.HasOne<Rota>().WithMany().HasForeignKey("RotaId").OnDelete(DeleteBehavior.Cascade));
 
             modelBuilder.Entity<UserRole>()
@@ -70,6 +71,8 @@ namespace ShiftRotaManager.Data.Data
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleId);
 
+            modelBuilder.Entity<TeamMemberPreference>()
+                .HasKey(p => new { p.TeamMemberId, p.DayOfWeek, p.ShiftId});
             // Seed initial roles
             //SeedData(modelBuilder); EF SQL Server
         }

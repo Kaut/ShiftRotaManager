@@ -369,35 +369,37 @@ namespace ShiftRotaManager.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRecommendedMembers(DateTime startDate, DateTime endDate)
         {
-            // Fetch all members once to avoid multiple database calls.
             var allMembers = await _teamMemberService.GetAllTeamMembersAsync();
 
             var recommendations = new List<object>();
 
+
             // Loop through each day in the date range.
             for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
             {
-                // Get the day of the week for the current date (e.g., "Monday").
-                var dayOfWeek = date.DayOfWeek.ToString();
+                // Get the DayOfWeek for the current date.
+                var dayOfWeek = date.DayOfWeek;
 
-                // Find all members whose preferred days string contains the current day.
-                var recommendedMembers = allMembers
-                    .Where(m => !string.IsNullOrEmpty(m.PreferredDaysOfWeek) && m.PreferredDaysOfWeek.Contains(dayOfWeek))
-                    .Select(m => new
+                // Filter members who have a preference for the current day of the week.
+                var membersWithPreference = allMembers.Where(m => m.Preferences.Any(p => p.DayOfWeek == dayOfWeek));
+                // Map the members to the required JSON structure for the front-end.
+                var recommendedMembers = membersWithPreference
+                    .Select(m =>
                     {
-                        id = m.Id,
-                        name = $"{m.FirstName} {m.LastName}",
-                        preferredDay = dayOfWeek,
-                        preferredShiftId = m.PreferredShift.Id,
-                        preferredShiftName = m.PreferredShift != null ? m.PreferredShift.Name : "N/A"
+                        // The repository's filtered include ensures we only get the relevant preference.
+                        var preference = m.Preferences.FirstOrDefault(p => p.DayOfWeek == dayOfWeek);
+                        return new
+                        {
+                            id = m.Id,
+                            name = m.FullName,
+                            preferredDay = dayOfWeek.ToString(),
+                            preferredShiftId = preference?.ShiftId,
+                            preferredShiftName = preference?.Shift?.Name ?? "N/A"
+                        };
                     })
                     .ToList();
 
-                recommendations.Add(new
-                {
-                    date = date.ToShortDateString(),
-                    members = recommendedMembers
-                });
+                recommendations.Add(new { date = date.ToShortDateString(), members = recommendedMembers });
             }
 
             // Return the list of recommended members per day as a JSON object.
