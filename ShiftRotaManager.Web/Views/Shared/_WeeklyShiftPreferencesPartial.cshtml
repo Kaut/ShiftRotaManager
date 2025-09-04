@@ -1,0 +1,86 @@
+@model ShiftRotaManager.Web.Models.TeamMemberViewModel
+
+<div class="mb-3">
+    <label class="form-label fw-bold">Weekly Shift Preferences</label>
+    <div class="table-responsive-md">
+        <table class="table table-bordered text-center align-middle table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-start" style="width: 120px;">Shift</th>
+                    @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                    {
+                        <th>@day.ToString().Substring(0, 3)</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var shift in Model.Shifts)
+                {
+                    <tr>
+                        <td class="text-start">@shift.Text</td>
+                        @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+                        {
+                            <td>
+                                <input type="radio" class="btn-check"
+                                       name="PreferredShifts[@day]"
+                                       value="@shift.Value"
+                                       id="pref-@day-@shift.Value"
+                                       @(Model.PreferredShifts.ContainsKey(day) && Model.PreferredShifts[day]?.ToString() == shift.Value ? "checked" : "")
+                                       autocomplete="off"
+                                       data-was-checked="@(Model.PreferredShifts.ContainsKey(day) && Model.PreferredShifts[day]?.ToString() == shift.Value ? "true" : "false")">
+                                <label class="btn btn-outline-primary rounded-circle p-0" style="width: 28px; height: 28px; line-height: 1.5; --bs-btn-border-width: 2px;" for="pref-@day-@shift.Value" title="Select @shift.Text for @day">
+                                    <i class="bi bi-check-lg"></i>
+                                </label>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div id="preferences-validation-message" class="text-danger"></div>
+    <div class="form-text">Select up to 5 preferred shifts for the week.</div>
+</div>
+
+@if (Context.Items["WeeklyShiftPreferencesScriptRendered"] == null)
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            const maxPreferences = 5;
+
+            function validatePreferences() {
+                var checkedCount = $('input.btn-check[name^="PreferredShifts"]:checked').length;
+                var validationMessage = $('#preferences-validation-message');
+
+                if (checkedCount > maxPreferences) {
+                    validationMessage.text(`You can select a maximum of ${maxPreferences} preferred shifts.`);
+                    return false;
+                } else {
+                    validationMessage.text('');
+                    return true;
+                }
+            }
+
+            $('input.btn-check[name^="PreferredShifts"]').on('click', function () {
+                var wasChecked = $(this).data('was-checked');
+
+                if (wasChecked) {
+                    $(this).prop('checked', false);
+                    $(this).data('was-checked', false);
+                } else {
+                    // Unset was-checked for other radios in the same day-group
+                    $('input.btn-check[name="' + $(this).attr('name') + '"]').data('was-checked', false);
+                    $(this).data('was-checked', true);
+                }
+                validatePreferences();
+            });
+
+            $('form').on('submit', function (e) {
+                if (!validatePreferences()) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+    Context.Items["WeeklyShiftPreferencesScriptRendered"] = true;
+}

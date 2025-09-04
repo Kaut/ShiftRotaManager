@@ -24,21 +24,33 @@ namespace ShiftRotaManager.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var teamMembers = await _teamMemberService.GetAllTeamMembersAsync();
+
+            ViewBag.GroupedPreferences = teamMembers.ToDictionary(
+                member => member.Id,
+                member => member.Preferences
+                    .GroupBy(p => p.Shift.Name)
+                    .Select(g => $"{g.Key}: {string.Join(", ", g.OrderBy(p => p.DayOfWeek).Select(p => p.DayOfWeek.ToString().Substring(0, 3)))}")
+                    .OrderBy(s => s)
+                    .ToList()
+            );
             return View(teamMembers);
         }
 
         // GET: TeamMembers/Create
         public async Task<IActionResult> Create()
         {
-            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name");
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name");
-            return View();
+            var viewModel = new TeamMemberViewModel
+            {
+                Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name"),
+                Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name")
+            };
+            return View(viewModel);
         }
 
         // POST: TeamMembers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,RoleId,ShiftId,PreferredDaysOfWeek")] TeamMemberViewModel teamMember)
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,RoleId,PreferredShifts")] TeamMemberViewModel teamMember)
         {
             if (ModelState.IsValid)
             {
@@ -50,8 +62,13 @@ namespace ShiftRotaManager.Web.Controllers
                         LastName = teamMember.LastName,
                         Email = teamMember.Email,
                         RoleId = teamMember.RoleId,
-                        ShiftId = teamMember.ShiftId,
-                        PreferredDaysOfWeek = string.Join(",", teamMember.PreferredDaysOfWeek)
+                        Preferences = teamMember.PreferredShifts
+                            .Where(p => p.Value.HasValue)
+                            .Select(p => new TeamMemberPreference
+                            {
+                                DayOfWeek = p.Key,
+                                ShiftId = p.Value.Value
+                            }).ToList()
                     };
                     await _teamMemberService.AddTeamMemberAsync(member);
                     return RedirectToAction(nameof(Index));
@@ -65,8 +82,8 @@ namespace ShiftRotaManager.Web.Controllers
                     ModelState.AddModelError(string.Empty, "An error occurred while adding the team member.");
                 }
             }
-            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", teamMember.ShiftId);
+            teamMember.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
+            teamMember.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name");
             return View(teamMember);
         }
 
@@ -90,19 +107,23 @@ namespace ShiftRotaManager.Web.Controllers
                 FirstName = teamMember.FirstName,
                 LastName = teamMember.LastName,
                 RoleId = teamMember.RoleId,
-                ShiftId = teamMember.ShiftId,
-                PreferredDaysOfWeek = teamMember.PreferredDaysOfWeek.Split(",")
+                PreferredShifts = Enum.GetValues(typeof(DayOfWeek))
+                    .Cast<DayOfWeek>()
+                    .ToDictionary(
+                        day => day,
+                        day => teamMember.Preferences.FirstOrDefault(p => p.DayOfWeek == day)?.ShiftId
+                    ),
+                Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId),
+                Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name")
             };
-            // Note: Updating roles would require more complex logic here, e.g., fetching current user roles
-            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", teamMember.ShiftId);
             return View(viewModel);
         }
 
         // POST: TeamMembers/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FirstName,LastName,Email,RoleId, ShiftId, PreferredDaysOfWeek")] TeamMemberViewModel teamMember)
+        public async Task<IActionResult> Edit(Guid id, 
+            [Bind("Id,FirstName,LastName,Email,RoleId,PreferredShifts")] TeamMemberViewModel teamMember)
         {
             if (id != teamMember.Id)
             {
@@ -113,6 +134,8 @@ namespace ShiftRotaManager.Web.Controllers
             {
                 try
                 {
+
+                    var shifts = await _shiftService.GetAllShiftsAsync();
                     var member = new TeamMember
                     {
                         Id = teamMember.Id,
@@ -120,8 +143,15 @@ namespace ShiftRotaManager.Web.Controllers
                         LastName = teamMember.LastName,
                         Email = teamMember.Email,
                         RoleId = teamMember.RoleId,
-                        ShiftId = teamMember.ShiftId,
-                        PreferredDaysOfWeek = string.Join(",", teamMember.PreferredDaysOfWeek)
+                        Preferences = teamMember.PreferredShifts
+                            .Where(p => p.Value.HasValue)
+                            .Select(p => new TeamMemberPreference
+                            {
+                                DayOfWeek = p.Key,
+                                Shift= shifts.FirstOrDefault(s => s.Id == p.Value.Value),
+                                ShiftId = p.Value.Value,
+                                TeamMemberId = teamMember.Id
+                            }).ToList()
                     };
                     await _teamMemberService.UpdateTeamMemberAsync(member);
                     return RedirectToAction(nameof(Index));
@@ -136,8 +166,8 @@ namespace ShiftRotaManager.Web.Controllers
                 }
             }
             // Repopulate the roles for the dropdown if we return to the view
-            ViewBag.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
-            ViewBag.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name", teamMember.ShiftId);
+            teamMember.Roles = new SelectList(await _teamMemberService.GetAllRolesAsync(), "Id", "Name", teamMember.RoleId);
+            teamMember.Shifts = new SelectList(await _shiftService.GetAllShiftsAsync(), "Id", "Name");
             return View(teamMember);
         }
 
