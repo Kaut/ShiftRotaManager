@@ -7,6 +7,7 @@ using ShiftRotaManager.Web.Data;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,12 +19,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 
+//temporarily replacing entra auth with password auth
 //Add Azure AD Authentication
-builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-        .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+// builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+//         .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+        {
+            options.LoginPath = "/Account/Login";
+            options.LogoutPath = "/Account/Logout";
+         });
 
 // Add Services for controllers and view/pages
-builder.Services.AddRazorPages().AddMicrosoftIdentityUI(); // this adds UI pages for signin/signout
+// builder.Services.AddRazorPages().AddMicrosoftIdentityUI(); // this adds UI pages for signin/signout
 
 
 // Register Repositories

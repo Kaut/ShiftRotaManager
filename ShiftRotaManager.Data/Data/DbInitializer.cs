@@ -31,10 +31,10 @@ namespace ShiftRotaManager.Data.Data
             // Seed Shifts
             var shifts = new Shift[]
             {
-                new() { Id = Guid.NewGuid(), Name = "Morning Shift", StartTime = new TimeSpan(6, 0, 0), EndTime = new TimeSpan(14, 0, 0), IsNightShift = false },
-                new() { Id = Guid.NewGuid(), Name = "Day Shift", StartTime = new TimeSpan(9, 0, 0), EndTime = new TimeSpan(17, 0, 0), IsNightShift = false },
-                new() { Id = Guid.NewGuid(), Name = "Evening Shift", StartTime = new TimeSpan(14, 0, 0), EndTime = new TimeSpan(22, 0, 0), IsNightShift = false },
-                new() { Id = Guid.NewGuid(), Name = "Night Shift", StartTime = new TimeSpan(22, 0, 0), EndTime = new TimeSpan(6, 0, 0), IsNightShift = true } // Crosses midnight
+                new() { Id = Guid.NewGuid(), Name = "Morning", StartTime = new TimeSpan(6, 0, 0), EndTime = new TimeSpan(14, 0, 0), IsNightShift = false },
+                new() { Id = Guid.NewGuid(), Name = "Day", StartTime = new TimeSpan(9, 0, 0), EndTime = new TimeSpan(17, 0, 0), IsNightShift = false },
+                new() { Id = Guid.NewGuid(), Name = "Evening", StartTime = new TimeSpan(14, 0, 0), EndTime = new TimeSpan(22, 0, 0), IsNightShift = false },
+                new() { Id = Guid.NewGuid(), Name = "Night", StartTime = new TimeSpan(22, 0, 0), EndTime = new TimeSpan(6, 0, 0), IsNightShift = true } // Crosses midnight
             };
             foreach (Shift s in shifts)
             {
@@ -45,19 +45,17 @@ namespace ShiftRotaManager.Data.Data
             var managerRole = context.Roles.Single(r => r.Name == "Manager");
             var engineerRole = context.Roles.Single(r => r.Name == "Engineer");
 
-            var PreferredDaysOfWeek1 = "Sunday,Monday,Tuesday,Wednesday,Thursday";
-            var PreferredDaysOfWeek2 = "Tuesday,Wednesday,Thursday,Friday,Saturday";
 
             // Seed Team Members
             var teamMembers = new TeamMember[]
             {
-                new() { Id = Guid.NewGuid(), FirstName = "Kautilya", LastName = "Shukla", Email = "kautilya.shukla@example.com", RoleId = engineerRole.Id },
-                new() { Id = Guid.NewGuid(), FirstName = "Bhromor", LastName = "Gayen", Email = "bhromor.gayen@example.com", RoleId = engineerRole.Id },
-                new() { Id = Guid.NewGuid(), FirstName = "Mikey", LastName = "Moore", Email = "mikey.moore@example.com", RoleId = managerRole.Id},
-                new() { Id = Guid.NewGuid(), FirstName = "Abdul", LastName = "Rauf", Email = "abdul.rauf@example.com", RoleId = engineerRole.Id},
-                new() { Id = Guid.NewGuid(), FirstName = "Abdul", LastName = "Razaq", Email = "abdul.razaq@example.com", RoleId = engineerRole.Id},
-                new() { Id = Guid.NewGuid(), FirstName = "Sridhar", LastName = "Konda", Email = "sridhar.konda@example.com", RoleId = engineerRole.Id},
-                new() { Id = Guid.NewGuid(), FirstName = "Udaya", LastName = "Arumugam", Email = "udaya.arumugam@example.com", RoleId = engineerRole.Id}
+                new() { Id = Guid.NewGuid(), FirstName = "Kaut", LastName = "Shu", Email = "kaut.shu@example.com", RoleId = engineerRole.Id },
+                new() { Id = Guid.NewGuid(), FirstName = "Bhr", LastName = "Gyn", Email = "bhr.gyn@example.com", RoleId = engineerRole.Id },
+                new() { Id = Guid.NewGuid(), FirstName = "Mk", LastName = "M", Email = "mk.m@example.com", RoleId = managerRole.Id},
+                new() { Id = Guid.NewGuid(), FirstName = "Abd", LastName = "Rf", Email = "abd.rf@example.com", RoleId = engineerRole.Id},
+                new() { Id = Guid.NewGuid(), FirstName = "Abd", LastName = "Rzq", Email = "abd.rzq@example.com", RoleId = engineerRole.Id},
+                new() { Id = Guid.NewGuid(), FirstName = "Sri", LastName = "K", Email = "sri.k@example.com", RoleId = engineerRole.Id},
+                new() { Id = Guid.NewGuid(), FirstName = "Sur", LastName = "Su", Email = "sur.su@example.com", RoleId = engineerRole.Id}
              };
             foreach (TeamMember tm in teamMembers)
             {
@@ -88,17 +86,17 @@ namespace ShiftRotaManager.Data.Data
             var rotas = new Rota[]
             {
                 // Assigned shifts
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(1), ShiftId = shifts.Single(s => s.Name == "Day Shift").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Mikey").Id, Status = RotaStatus.Open },
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(1), ShiftId = shifts.Single(s => s.Name == "Evening Shift").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Bhromor").Id, Status = RotaStatus.Open },
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(2), ShiftId = shifts.Single(s => s.Name == "Morning Shift").Id, TeamMemberId = teamMembers.Single(tm => tm.LastName == "Rauf").Id, Status = RotaStatus.Open },
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(2), ShiftId = shifts.Single(s => s.Name == "Night Shift").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Kautilya").Id, Status = RotaStatus.Open },
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(1), ShiftId = shifts.Single(s => s.Name == "Day").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Mk").Id, Status = RotaStatus.Open },
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(1), ShiftId = shifts.Single(s => s.Name == "Evening").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Bhr").Id, Status = RotaStatus.Open },
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(2), ShiftId = shifts.Single(s => s.Name == "Morning").Id, TeamMemberId = teamMembers.Single(tm => tm.LastName == "Rf").Id, Status = RotaStatus.Open },
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(2), ShiftId = shifts.Single(s => s.Name == "Night").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Kaut").Id, Status = RotaStatus.Open },
 
                 // Open shifts
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(3), ShiftId = shifts.Single(s => s.Name == "Day Shift").Id, Status = RotaStatus.Open },
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(3), ShiftId = shifts.Single(s => s.Name == "Morning Shift").Id, Status = RotaStatus.Open },
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(3), ShiftId = shifts.Single(s => s.Name == "Day").Id, Status = RotaStatus.Open },
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(3), ShiftId = shifts.Single(s => s.Name == "Morning").Id, Status = RotaStatus.Open },
 
                 // Paired shift
-                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(4), ShiftId = shifts.Single(s => s.Name == "Day Shift").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Mikey").Id, PairedTeamMembers = teamMembers.Where(tm => tm.FirstName.Contains("r")).ToList(), Status = RotaStatus.Assigned }
+                new() { Id = Guid.NewGuid(), Date = DateTime.Today.AddDays(4), ShiftId = shifts.Single(s => s.Name == "Day").Id, TeamMemberId = teamMembers.Single(tm => tm.FirstName == "Mk").Id, PairedTeamMembers = teamMembers.Where(tm => tm.FirstName.Contains("r")).ToList(), Status = RotaStatus.Assigned }
             };
             foreach (Rota r in rotas)
             {
